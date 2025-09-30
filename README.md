@@ -1,2 +1,1 @@
-<p align="center"> <img width="120"  alt="Doações Logo"> </p> <h1 align="center">🌟 Sistema de Doações para ONG 🌟</h1> <p align="center"> <i>Um sistema simples e organizado pra gerenciar doações, doadores e relatórios, com CRUD completo e interface amigável.</i> </p>
-
+<h1 align="center">🌟 Sistema de Doações para ONG 🌟</h1> <p align="center"> <i>Um sistema simples e organizado pra gerenciar doações, doadores e relatórios, com CRUD completo e interface amigável.</i> </p>
