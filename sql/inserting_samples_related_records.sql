@@ -17,19 +17,18 @@ RETURNING id_campanha;
 -- Doações para Campanha 1
 INSERT INTO doacao (id_doador, id_campanha, id_forma, id_tipo, valor)
 VALUES 
-(1, 1, 1, 1, 100.00),   -- João Gabriel doa dinheiro via pix
-(2, 1, 2, 1, 200.00);   -- João Guilherme doa dinheiro via cartão
+(1, 1, 1, 1, 100.00),   
+(2, 1, 2, 1, 200.00);   
 
 -- Doações para Campanha 2
 INSERT INTO doacao (id_doador, id_campanha, id_forma, id_tipo, valor)
 VALUES 
-(3, 2, 1, 3, 0.00),    -- João José doa roupas via pix
-(4, 2, 3, 3, 0.00);    -- José Antônio doa roupas via boleto
+(3, 2, 1, 3, 0.00),   
+(4, 2, 3, 3, 0.00);    
 
 -- ======================================
 -- RECIBOS
 -- ======================================
--- Gera recibos automaticamente para todas as doações inseridas
 INSERT INTO recibo (id_doacao)
 SELECT id_doacao FROM doacao;
 
