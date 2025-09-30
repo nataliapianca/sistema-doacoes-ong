@@ -1,40 +1,45 @@
-﻿🌟 Sistema de Doações para ONG
+🌟 Sistema de Doações para ONG
 📌 Status do Projeto
 ✅ Feito
 
-📊 Diagramas relacionais criados (entidades: Doadores, Doações, etc., com PK/FK e relacionamentos).
+📊 Diagrama relacional
 
-📝 Scripts SQL de criação das tabelas e relacionamentos gerados e testados.
+Entidades: Doadores, Doações
 
-⏳ Faltando
+PK/FK e relacionamentos definidos
 
+📝 Scripts SQL
+
+Criação das tabelas e relacionamentos gerados e testados no banco
+
+⬜ Faltando
 🏗️ Classes principais (modelo)
 
-Atributos correspondentes às tabelas.
+Criar classes correspondentes às tabelas
 
-Getters/setters e métodos toString() para exibição.
+Implementar atributos, getters/setters e toString()
 
-Relacionamento de objetos quando houver FK.
+Incluir relacionamento de objetos quando houver FK
 
 🔧 Classes controladoras (CRUD)
 
-Conexão com banco de dados.
+Conexão com banco de dados
 
-Inserir, atualizar, remover e listar registros.
+Inserir, atualizar, remover e listar registros
 
-Tratamento de integridade de PK/FK.
+Tratar integridade de PK/FK ao remover ou atualizar
 
 📑 Relatórios
 
-Consulta agregada (GROUP BY) – ex.: total de doações por doador.
+Consulta agregada (GROUP BY) – ex.: total de doações por doador
 
-Consulta com join entre tabelas – ex.: relatório de doações detalhado.
+Consulta com join entre tabelas – ex.: relatório detalhado de doações
 
 🎨 Interface e menu
 
-Splash Screen mostrando:
+Splash Screen com:
 
-Nome do sistema
+Nome do sistema: Sistema de Doações para ONG
 
 Nomes dos integrantes do grupo
 
@@ -52,15 +57,14 @@ Atualizar registros
 
 Sair
 
-Confirmação de ações e fluxo contínuo.
+Confirmação de ações e fluxo contínuo
 
 🧪 Testes completos
 
-Testar todas as funcionalidades do CRUD, relatórios e menus.
+Testar todas as funcionalidades do CRUD, relatórios e menus
 
 📂 Documentação e entrega
 
-README com instruções de execução no Linux.
+README com instruções de execução no Linux
 
-Vídeo demonstrativo mostrando todos os menus e funcionalidades em funcionamento.
-
+Vídeo demonstrativo mostrando todos os menus e funcionalidades
