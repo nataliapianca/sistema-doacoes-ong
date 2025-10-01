@@ -32,3 +32,32 @@ Show
 Connection limit
 20
 
+
+
+
+condxão com o vs 
+
+biblioteca: 
+python3 -m pip install psycopg2
+
+python: 
+import psycopg2
+
+
+
+codigo vs
+
+def main():
+    conn = psycopg2.connect('postgres://avnadmin:AVNS_GYnUX8x5-5Puwpe5tJh@pg-1a036a7c-ong.j.aivencloud.com:12001/defaultdb?sslmode=require')
+
+    query_sql = 'SELECT VERSION()'
+
+    cur = conn.cursor()
+    cur.execute(query_sql)
+
+    version = cur.fetchone()[0]
+    print(version)
+
+
+if __name__ == "__main__":
+    main()
