@@ -1,11 +1,14 @@
 -- ===============================
--- TABELA PESSOA (base para Usuario e Doador)
+-- TABELA PESSOA
 -- ===============================
 CREATE TABLE pessoa (
     id_pessoa SERIAL PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
     cpf CHAR(11) UNIQUE NOT NULL,
-    email VARCHAR(150) UNIQUE NOT NULL
+    email VARCHAR(150) UNIQUE NOT NULL,
+    senha VARCHAR(200) NOT NULL,
+    perfil VARCHAR(50) DEFAULT 'doador', 
+    tipo_pessoa VARCHAR(20) NOT NULL CHECK (tipo_pessoa IN ('doador', 'usuario'))
 );
 
 -- ===============================
@@ -25,45 +28,26 @@ CREATE TABLE endereco (
 );
 
 -- ===============================
--- TABELA USUARIO (especialização de Pessoa)
--- ===============================
-CREATE TABLE usuario (
-    id_usuario SERIAL PRIMARY KEY,
-    id_pessoa INT UNIQUE NOT NULL,
-    senha VARCHAR(200) NOT NULL,
-    perfil VARCHAR(50) DEFAULT 'usuario', 
-    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
-);
-
--- ===============================
--- TABELA DOADOR (especialização de Pessoa)
--- ===============================
-CREATE TABLE doador (
-    id_doador SERIAL PRIMARY KEY,
-    id_pessoa INT UNIQUE NOT NULL,
-    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa)
-);
-
--- ===============================
--- TABELA CAMPANHA
--- ===============================
-CREATE TABLE campanha (
-    id_campanha SERIAL PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    nome VARCHAR(150) NOT NULL,
-    descricao TEXT,
-    data_inicio DATE NOT NULL,
-    data_fim DATE NOT NULL,
-    id_status INT NOT NULL,
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
-);
-
--- ===============================
 -- TABELA STATUS_CAMPANHA
 -- ===============================
 CREATE TABLE status_campanha (
     id_status SERIAL PRIMARY KEY,
     descricao VARCHAR(50) NOT NULL 
+);
+
+-- ===============================
+-- TABELA CAMPANHA (criada por um usuário)
+-- ===============================
+CREATE TABLE campanha (
+    id_campanha SERIAL PRIMARY KEY,
+    id_pessoa INT NOT NULL,
+    nome VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    id_status INT NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id_pessoa),
+    FOREIGN KEY (id_status) REFERENCES status_campanha(id_status)
 );
 
 -- ===============================
@@ -87,13 +71,13 @@ CREATE TABLE tipo_doacao (
 -- ===============================
 CREATE TABLE doacao (
     id_doacao SERIAL PRIMARY KEY,
-    id_doador INT NOT NULL,
+    id_doador INT NOT NULL,     
     id_campanha INT NOT NULL,
     id_forma INT NOT NULL,
     id_tipo INT NOT NULL,
     valor DECIMAL(10,2) NOT NULL,
     data_doacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_doador) REFERENCES doador(id_doador),
+    FOREIGN KEY (id_doador) REFERENCES pessoa(id_pessoa),
     FOREIGN KEY (id_campanha) REFERENCES campanha(id_campanha),
     FOREIGN KEY (id_forma) REFERENCES forma_pagamento(id_forma),
     FOREIGN KEY (id_tipo) REFERENCES tipo_doacao(id_tipo)
@@ -109,3 +93,8 @@ CREATE TABLE recibo (
     codigo_validacao UUID DEFAULT gen_random_uuid(), -- gera código único
     FOREIGN KEY (id_doacao) REFERENCES doacao(id_doacao)
 );
+
+
+
+
+
