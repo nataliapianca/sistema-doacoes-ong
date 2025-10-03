@@ -107,5 +107,7 @@ FormaPagamento "1" -- "0..*" CampanhaFormaPagamento
 @enduml
 
 
+LINK DO  DOCUMENTO COM DIAGRAMAS:
+https://edufaesa-my.sharepoint.com/:w:/g/personal/wanessa_guisso_aluno_faesa_br/EcRyt9IhPa5Bjfc0YuKg46IBqT6JCLd7ZAwy9UUCmUsgTQ?e=hesadx
 
 
