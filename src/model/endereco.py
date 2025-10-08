@@ -19,8 +19,8 @@ class Endereco:
         self.set_estado(estado)
         self.set_cep(cep)
 
-    def set_id_endereco(self, id_endereco: int):
-        self.id_endereco = id_endereco
+        def set_id_endereco(self, id_endereco: int):
+            self.id_endereco = id_endereco
 
     def set_id_pessoa(self, id_pessoa: int):
         self.id_pessoa = id_pessoa
