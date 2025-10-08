@@ -31,6 +31,8 @@ Para testar a conexão com o banco de dados PostgreSQL via módulo de conexão d
 ---
 
 ## Organização do Projeto
+
+'''
 Sistema de Doações para ONG 🌟
 │
 ├── diagrams/
@@ -71,6 +73,7 @@ Sistema de Doações para ONG 🌟
 │
 └── requirements.txt                   # Bibliotecas necessárias
 
+'''
 
 ### diretórios principais
 
