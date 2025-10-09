@@ -1,3 +1,6 @@
+from conexion.connection import PostgresQueries
+
+
 class Relatorio:
     def __init__(self):
         with open("sql/relatorio_pessoas.sql") as f:
@@ -9,4 +12,25 @@ class Relatorio:
         with open("sql/relatorio_campanhas.sql") as f:
             self.query_relatorio_campanhas = f.read()
 
-"""falta terminar os metodos de relatorio, pra isso tem q mexer no controller"""
+
+
+    def get_relatorio_pessoas(self):
+        postgree = PostgresQueries()
+        postgree.connect()
+
+        print(postgree.sqlToDataFrame(self, query_relatorio_pessoas))
+        input("Pressione Enter para Sair do Relatório de Pessoas")
+
+    def get_relatorio_doacoes(self):
+        postgree = PostgresQueries()
+        postgree.connect()
+
+        print(postgree.sqlToDataFrame(self, query_relatorio_doacoes))
+        input("Pressione Enter para Sair do Relatório de Pessoas")
+
+    def get_relatorio_campanhas(self):
+        postgree = PostgresQueries()
+        postgree.connect()
+
+        print(postgree.sqlToDataFrame(self, query_relatorio_campanhas))
+        input("Pressione Enter para Sair do Relatório de Pessoas")

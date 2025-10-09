@@ -7,7 +7,7 @@ from controller.controller_campanha import Controller_Campanha
 
 tela_inicial = SplashScreen()
 relatorio = Relatorio()
-ctrl_pessoa = Controller_Pessoa()
+controller_pessoa = Controller_Pessoa()
 ctrl_endereco = Controller_Endereco()
 ctrl_campanha = Controller_Campanha()
 
