@@ -4,20 +4,20 @@ from recibo import Recibo
 
 
 class Doacao:
-    def __init__(
-        self,
-        id_doacao: int = None,
-        id_pessoa: int = None,
-        id_campanha: int = None,
-        valor: Decimal = None,
-        data_doacao: datetime = None,
-        recibo: Recibo = None
-    ):
+    def __init__(self,
+                 id_doacao: int = None,
+                 id_pessoa: int = None,
+                 id_campanha: int = None,
+                 valor: Decimal = None,
+                 data_doacao: datetime = None,
+                 recibo: Recibo = None):
+
         self.set_id_doacao(id_doacao)
         self.set_id_pessoa(id_pessoa)
         self.set_id_campanha(id_campanha)
         self.set_valor(valor)
         self.set_data_doacao(data_doacao)
+        self.set_recibo(recibo)
 
     def set_id_doacao(self, id_doacao: int):
         self._id_doacao = id_doacao
@@ -32,28 +32,31 @@ class Doacao:
         self._valor = Decimal(valor) if valor is not None else None
 
     def set_data_doacao(self, data_doacao: datetime):
-        if data_doacao is None:
-            self.data_doacao = datetime.now()  # define data atual se não for passada
-        else:
-            self.data_doacao = data_doacao
+        self._data_doacao = data_doacao if data_doacao is not None else datetime.now() # define data atual se não for passada
+        
+    def set_recibo(self, recibo: Recibo):
+        self._recibo = recibo
 
-    def get_id_doacao(self):
+    def get_id_doacao(self) -> int:
         return self._id_doacao
 
-    def get_id_pessoa(self):
+    def get_id_pessoa(self) -> int:
         return self._id_pessoa
 
-    def get_id_campanha(self):
+    def get_id_campanha(self) -> int:
         return self._id_campanha
 
-    def get_valor(self):
+    def get_valor(self) -> Decimal:
         return self._valor
 
-    def get_data_doacao(self):
+    def get_data_doacao(self) -> datetime:
         return self._data_doacao
 
-    #toString
-    def to_str(self):
-        return (f"Doação:id={self._id_doacao}, pessoa={self._id_pessoa}, "
-                f"campanha={self._id_campanha}, valor=R${self._valor}, "
-                f"data={self._data_doacao.strftime('%d/%m/%Y %H:%M:%S')})")
+    def get_recibo(self) -> Recibo:
+        return self._recibo
+
+    def to_string(self) -> str:
+        data_formatada = self.get_data_doacao().strftime('%d/%m/%Y %H:%M:%S')
+        valor_formatado = f"R$ {self.get_valor()}" if self.get_valor() is not None else "N/A"
+
+        return (f"ID: {self.get_id_doacao()} | "f"ID Pessoa: {self.get_id_pessoa()} | "f"ID Campanha: {self.get_id_campanha()} | "f"Valor: {valor_formatado} | "f"Data: {data_formatada}")
