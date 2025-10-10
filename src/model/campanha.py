@@ -9,7 +9,6 @@ class Campanha:
                  descricao: str = None,
                  data_inicio: date = None,
                  data_fim: date = None,
-                 status: bool = None,
                  formaPagamento: str = None
                 ):
         self.set_id_campanha(id_campanha),
@@ -18,6 +17,8 @@ class Campanha:
         self.set_descricao(descricao),
         self.set_data_inicio(data_inicio),
         self.set_data_fim(data_fim)
+        self.set_formaPagamento(formaPagamento)
+        self.ativar()
        
 
 def set_id_campanha(self, id_campanha: int):
@@ -38,12 +39,14 @@ def set_data_inicio(self, data_inicio: date):
 def set_data_fim(self, data_fim: date):
     self.data_fim = data_fim
 
-def set_status(self, status: bool):
-    self.status = status
-
 def set_formaPagamento(self, formaPagamento: str):
     self.formaPagamento = formaPagamento
 
+def ativar(self):
+    self.status = True
+
+def desativar(self):
+    self.status = False
 
 
 def get_id_campanha(self) -> int:
@@ -69,6 +72,9 @@ def is_ativa(self) -> bool:
 
 def get_formaPagamento(self) -> str:
     return self.formaPagamento
+
+
+
 
 
 def toString(self) -> str:

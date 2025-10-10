@@ -9,8 +9,9 @@ class FormaPagamento:
                 pessoa: Pessoa = None,
                 formaPagamento: str = None):
         self.set_id_forma(id_forma)
-        self.set_FormaPagamento(FormaPagamento)
-
+        self.set_campanha(campanha)
+        self.set_FormaPagamento(formaPagamento)
+        self.set_pessoa(pessoa)
         
 def set_id_forma(self, id_forma: int):
     self.id_forma = id_forma
@@ -21,8 +22,8 @@ def set_campanha(self, campanha: Campanha):
 def set_pessoa(self, pessoa: Pessoa):
     self.pessoa = pessoa
 
-def set_FormaPagamento(self, FormaPagamento: str):
-    self.FormaPagamento = FormaPagamento
+def set_FormaPagamento(self, formaPagamento: str):
+    self.formaPagamento = formaPagamento
 
 
 
