@@ -1,21 +1,21 @@
 from datetime import date
-import pessoa
+from pessoa import Pessoa
 
 class Campanha:
     def __init__(self,
                  id_campanha: int = None,
-                 pessoa: pessoa = None,
+                 pessoa: Pessoa = None,
                  nome: str = None,
                  descricao: str = None,
                  data_inicio: date = None,
                  data_fim: date = None,
                  formaPagamento: str = None
                 ):
-        self.set_id_campanha(id_campanha),
-        self.set_pessoa(pessoa.get_pessoa() if pessoa else None),
-        self.set_nome(nome),
-        self.set_descricao(descricao),
-        self.set_data_inicio(data_inicio),
+        self.set_id_campanha(id_campanha)
+        self.set_pessoa(pessoa.get_pessoa() if pessoa else None)
+        self.set_nome(nome)
+        self.set_descricao(descricao)
+        self.set_data_inicio(data_inicio)
         self.set_data_fim(data_fim)
         self.set_formaPagamento(formaPagamento)
         self.ativar()
