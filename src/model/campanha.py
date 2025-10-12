@@ -24,7 +24,7 @@ class Campanha:
 def set_id_campanha(self, id_campanha: int):
     self.id_campanha = id_campanha
     
-def set_pessoa(self, pessoa: pessoa):
+def set_pessoa(self, pessoa: Pessoa):
     self.pessoa = pessoa
 
 def set_nome(self, nome: str):
@@ -52,7 +52,7 @@ def desativar(self):
 def get_id_campanha(self) -> int:
     return self.id_campanha
 
-def get_pessoa(self) -> pessoa:
+def get_pessoa(self) -> Pessoa:
     return self.pessoa
 
 def get_nome(self) -> str:
