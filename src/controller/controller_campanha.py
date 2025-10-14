@@ -124,11 +124,11 @@ class Controller_Campanha:
             return None
         
 
-    def excluir_campanha(self):
+    def desativar_campanha(self):
         postGree = PostgresQueries(can_write=True)
-        postGree.connect  
+        postGree.connect()  
 
-        id_campanha = int(input("Informe o ID da Campanha que irá excluir: "))
+        id_campanha = int(input("Informe o ID da Campanha que irá desativar: "))
 
         if self.verifica_existencia_campanha(postGree, id_campanha):
             df_campanha = postGree.sqlToDataFrame(f"select id_pessoa, nome, descricao, data_inicio, data_fim, formaPagamento from campanha where id_campanha = '{id_campanha}'")
@@ -140,23 +140,23 @@ class Controller_Campanha:
             cpf_pessoa = df_pessoa.cpf.values[0]
             pessoa = self.validar_pessoa(postGree, cpf_pessoa)
 
-            opcao_excluir = input(f"Tem certeza que deseja excluir a campanha {id_campanha} [S ou N]:")
-            if opcao_excluir.lower() == "s":
-                postGree.write(f"delete from campanha where id_campanha = '{id_campanha}'")
-                campanha_excluida = Campanha(id_campanha, pessoa, df_campanha.nome[0], df_campanha.descricao[0], df_campanha.data_inicio[0], df_campanha.data_fim[0], df_campanha.formaPagamento[0])
+            opcao_desativar = input(f"Tem certeza que deseja desativar a campanha {id_campanha} [S ou N]? ")
+            if opcao_desativar.lower() == "s":
+                postGree.write(f"update Campanha set statos = False where id_campanha = '{id_campanha}'")
+                campanha_desativada = Campanha(id_campanha, pessoa, df_campanha.nome[0], df_campanha.descricao[0], df_campanha.data_inicio[0], df_campanha.data_fim[0], df_campanha.formaPagamento[0], status = False)
 
-                print("Campanha removida com Sucesso!")
-                print(campanha_excluida.toString())
+                print("Campanha desativada com Sucesso!")
+                print(campanha_desativada.toString())
 
 
         else:
-            print(f"A campanha de ID {id_campanha} não existe.")
+            print(f"A campanha de ID {id_campanha} não existe ou está inativa.")
             return None
         
 
     def verifica_existencia_campanha(self, postGree: PostgresQueries, id_campanha: int=None) -> bool:
-        df_campanha = postGree.sqlToDataFrame(f"select id_campanha, id_pessoa, nome, descricao, data_inicio, data_fim, formaPagamento from campanha where id_campanha = '{id_campanha}'")
-        return df_campanha.empty
+        df_campanha = postGree.sqlToDataFrame(f"select id_campanha from Campanha where id_campanha = '{id_campanha}' and statos = True")
+        return not df_campanha.empty
     
 
     def listar_pessoas(self, postGree: PostgresQueries, need_connect:bool=False):

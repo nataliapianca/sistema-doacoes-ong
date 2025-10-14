@@ -15,8 +15,7 @@ def reports(opcao_relatorio: int = 0):
     if opcao_relatorio == 1:
         relatorio.get_relatorio_campanhas()
     elif opcao_relatorio == 2:
-
-        relatorio.get_relatorio_pessoas_com_endereco()
+        relatorio.get_relatorio_doacoes()
 
 
 def inserir(opcao_inserir: int = 0):
@@ -44,7 +43,7 @@ def excluir(opcao_excluir: int = 0):
 
     elif opcao_excluir == 2:
         relatorio.get_relatorio_campanhas()
-        ctrl_campanha.excluir_campanha()
+        ctrl_campanha.desativar_campanha()
 
 
 def run():

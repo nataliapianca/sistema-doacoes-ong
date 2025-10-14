@@ -9,9 +9,9 @@ class Campanha:
                  descricao: str = None,
                  data_inicio: date = None,
                  data_fim: date = None,
-                 formaPagamento: str = None
+                 formaPagamento: str = None,
                 ):
-        self.set_id_campanha(id_campanha)
+        self.id_campanha = id_campanha
         self.set_pessoa(pessoa.get_pessoa() if pessoa else None)
         self.set_nome(nome)
         self.set_descricao(descricao)
@@ -20,9 +20,6 @@ class Campanha:
         self.set_formaPagamento(formaPagamento)
         self.ativar()
        
-
-def set_id_campanha(self, id_campanha: int):
-    self.id_campanha = id_campanha
     
 def set_pessoa(self, pessoa: Pessoa):
     self.pessoa = pessoa
