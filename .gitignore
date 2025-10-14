@@ -1,0 +1,185 @@
+# <ROOT> .gitignore - genérico para projetos com Python, .NET, Node, VSCode, JetBrains, etc.
+
+# ---- SISTEMA OPERACIONAL ----
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# ---- IDEs / EDITORS ----
+# VS Code
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider / IntelliJ / PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# ---- LANGUAGES / RUNTIME ----
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+.eggs/
+*.egg-info/
+.env
+.venv/
+venv/
+ENV/
+env/
+pip-wheel-metadata/
+.python-version
+
+# Byte-compiled / C extensions
+*.so
+
+# Jupyter
+.ipynb_checkpoints
+
+# Virtual env / pipenv
+Pipfile.lock
+
+# SQLite / DB files
+*.sqlite3
+*.db
+*.db-journal
+
+# ---- .NET / C# ----
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+*.user
+*.vspscc
+*.vssscc
+TestResults/
+*.nupkg
+*.snupkg
+*.pdb
+*.cache
+project.lock.json
+artifacts/
+packages/
+
+# Rider caches
+.idea/
+*.sln.ide
+
+# Entity Framework / DB models
+*.dbmdl
+
+# ---- Node / JavaScript / TypeScript ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log
+/dist
+/build
+/*.tgz
+
+# Next.js
+.next/
+out/
+
+# Vite/Angular
+/.parcel-cache
+/.cache
+
+# ---- Java / Gradle / Maven (caso tenha) ----
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+
+# ---- Docker ----
+docker-compose.override.yml
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+# ---- CI / Tools ----
+# GitHub Actions
+.github/workflows/*
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Coverage / reports
+coverage/
+coverage.xml
+lcov.info
+reports/
+
+# ---- Logs / uploads / temporários ----
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+# ---- Secrets / Keys / Credentials ----
+# Nunca commitar chaves/credenciais
+*.pem
+*.key
+*.crt
+secrets.*
+credentials.*
+aws_credentials
+aws_secret*
+
+# ---- Arquivos gerados por Ferramentas comuns ----
+# Excel/Office temp
+~$*
+*.xlsx~ 
+*.docx~
+
+# ---- Arquivos específicos que você pode querer ignorar ----
+# Arquivos de relatórios baixados automaticamente
+RELATORIO-NOTAS.xlsx
+N-MV.xlsx
+N-VIRTUAL.xlsx
+N-ESCRITEC.xlsx
+
+# Ajuste final / local
+# Adicione regras específicas do seu projeto abaixo, por exemplo:
+# /minha-pasta-de-build/
+# /scripts/sensivel.sh

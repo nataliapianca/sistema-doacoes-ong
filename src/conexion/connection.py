@@ -7,7 +7,7 @@ class PostgresQueries:
         self.can_write = can_write
         self.host = "bdong-nhui.j.aivencloud.com"
         self.port = 15697
-        self.database = "defaultdb"
+        self.database = "sistema_doacoes"
 
         with open("src/conexion/passphrase/authentication.pg", "r") as f:
           self.user, self.password = f.read().strip().split(",")
