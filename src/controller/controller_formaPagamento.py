@@ -1,4 +1,4 @@
-from .controller_campanha import Controller_Campanha
+from controller.controller_campanha import Controller_Campanha
 from controller.controller_pessoa import Controller_Pessoa
 from model.formaPagamento import FormaPagamento
 from conexion.connection import PostgresQueries
@@ -7,14 +7,15 @@ from model.campanha import Campanha
 
 class Controller_FormaPagamento:
     def __init__(self):
-        self.control_pessoa = Controller_Pessoa
-        self.control_campanha = Controller_Campanha
+        self.control_pessoa = Controller_Pessoa()
+        self.control_campanha = Controller_Campanha()
 
 
-    def inserir_formaPagamento(self, postGree, id_campanha: int, id_pessoa:int, nome_forma:str) -> FormaPagamento:
+    def inserir_formaPagamento(self, postGree: PostgresQueries, id_campanha: int, id_pessoa:int, nome_forma:str) -> FormaPagamento:
         self.listar_campanhas(postGree, need_connect= True) 
         """aqui ele lista as campanhas, não sei se é necessário"""
-        campanha = self.validar_campanha(postGree, id_campanha)
+
+        campanha = self.validar_campanha(postGree, id_campanha) 
         if campanha is None:
             return None
         
@@ -35,13 +36,12 @@ class Controller_FormaPagamento:
 
         try: 
             cursor.execute("""
-            begin
-                :id_forma := FORMAPAGAMENTO_ID_FORMAPAGAMENTO_SEQ.NEXTVAL;
-                insert into formaPagamento values(:id_forma, :id_campanha, :id_pessoa, :formaPagamento);
-            end;          
+            INSERT INTO FormaPagamento (id_campanha, id_pessoa, descricao) 
+            VALUES (%(id_campanha)s, %(id_pessoa)s, %(descricao)s)
+            RETURNING id_forma_pagamento;         
             """, dado)
 
-            id_forma = output_value.getvalue()
+            id_forma = cursor.fetchone()[0]
             postGree.conn.commit()
 
             nova_formaPagamento = FormaPagamento(id_forma, campanha, pessoa, nome_forma)
@@ -93,21 +93,21 @@ class Controller_FormaPagamento:
 
     def listar_pessoas(self, postGree: PostgresQueries, need_connect:bool=False):
         query = """
-               select id_campanha,
-               c.nome as nome_campanha,
-               c.data_inicio,
-               c.data_fim,
-               c.status,
-               d.id_doacao,
-               p.nome as nome_doador,
-               d.valor as valor_doacao,
-               d.data_doacao,
-               fp.formaPagamento as forma_pagamento_campanha,
-               from Campanha c
-               inner join Doacao d ON c.id_campanha = d.id_campanha
-               inner join pessoa p ON d.id_pessoa = p.id_pessoa
-               left join FormaPagamento fp ON d.id_campanha = fp.id_campanha AND d.id_pessoa = fp.id_pessoa
-               order by c.data_inicio DESC, nome_campanha, d.data_doacao;
+        SELECT 
+            c.id_campanha,
+            c.nome AS nome_campanha,
+            c.data_inicio,
+            c.data_fim,
+            c.status,
+            d.id_doacao,
+            p.nome AS nome_doador,
+            d.valor AS valor_doacao,
+            c.formapagamento AS forma_pagamento_campanha
+        FROM campanha c
+        INNER JOIN doacao d ON c.id_campanha = d.id_campanha
+        INNER JOIN pessoa p ON d.id_pessoa = p.id_pessoa
+        LEFT JOIN formapagamento fp ON c.id_campanha = fp.id_campanha
+        ORDER BY c.data_inicio DESC, nome_campanha, d.data_doacao;
                """
         if need_connect:
            postGree.connect()
@@ -116,23 +116,24 @@ class Controller_FormaPagamento:
 
     def listar_campanhas(self, postGree: PostgresQueries, need_connect:bool=False):
             query = """
-                    select fp.id_forma,
-                    fp.formapagamento AS forma_de_pagamento,
+                    select fp.id_forma_pagamento,
+                    fp.descricao AS forma_de_pagamento,
                     fp.id_campanha,
                     c.nome AS nome_campanha,
                     c.data_inicio,
-                    c.status
+                    c.status,
+                    fp.id_pessoa
                     from FormaPagamento fp
                     inner join Campanha c ON fp.id_campanha = c.id_campanha
-                    order by c.nome, fp.formaPagamento;
+                    order by c.nome, fp.descricao;
                     """
             if need_connect:
                 postGree.connect()
             print(postGree.sqlToDataFrame(query))
     
 
-    def validar_pessoa(self, postGree: PostgresQueries, cpf_pessoa: int=None) -> Pessoa:
-        if self.control_pessoa.verifica_existencia_pessoa(postGree, cpf_pessoa):
+    def validar_pessoa(self, postGree: PostgresQueries, cpf_pessoa: str=None) -> Pessoa:
+        if not self.control_pessoa.verifica_existencia_pessoa(postGree, cpf_pessoa):
             print(f"A pessoa de CPF: {cpf_pessoa} informado não existe.")
             return None
         else:
@@ -147,9 +148,8 @@ class Controller_FormaPagamento:
             return pessoa
         
 
-    def validar_campanha(self, postGree: PostgresQueries, id_campanha: int=None) -> Campanha:
+    def validar_campanha(self, postGree: PostgresQueries, id_campanha: int) -> Campanha:
         if not self.control_campanha.verifica_existencia_campanha(postGree, id_campanha):
-            print(f"A Campanha {id_campanha} informada não existe.")
             return None
     
         postGree.connect()
@@ -180,4 +180,4 @@ class Controller_FormaPagamento:
 
     def verificar_existencia_formaPagamento(self, postGree: PostgresQueries, id_forma: int) -> bool:
         df_formaPagamento = postGree.sqlToDataFrame(f"select id_forma from formaPagamento where id_forma = '{id_forma}'")
-        return df_formaPagamento.empty
+        return not df_formaPagamento.empty

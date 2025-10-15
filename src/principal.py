@@ -20,7 +20,7 @@ def reports(opcao_relatorio: int = 0):
 def inserir(opcao_inserir: int = 0):
     if opcao_inserir == 1:
         ctrl_pessoa.inserir_pessoa()
-    elif opcao_inserir == 2:
+    elif opcao_inserir == 3:
         ctrl_campanha.inserir_campanha()
 
 def atualizar(opcao_atualizar: int = 0):

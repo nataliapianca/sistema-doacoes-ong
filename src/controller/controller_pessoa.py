@@ -133,4 +133,4 @@ class Controller_Pessoa:
 
     def verifica_existencia_pessoa(self, postgres: PostgresQueries, cpf: str) -> bool:
         df_pessoa = postgres.sqlToDataFrame(f"SELECT cpf FROM pessoa WHERE cpf = '{cpf}';")
-        return df_pessoa.empty
+        return not df_pessoa.empty
