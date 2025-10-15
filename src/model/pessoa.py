@@ -5,14 +5,12 @@ class Pessoa:
                  cpf: str = None,
                  email: str = None,
                  senha: str = None,
-                 perfil: str = "doador",
                  tipo_pessoa: str = "doador"):
         self.set_id_pessoa(id_pessoa)
         self.set_nome(nome)
         self.set_cpf(cpf)
         self.set_email(email)
         self.set_senha(senha)
-        self.set_perfil(perfil)
         self.set_tipo_pessoa(tipo_pessoa)
 
     # setters
@@ -31,8 +29,6 @@ class Pessoa:
     def set_senha(self, senha: str):
         self.senha = senha
 
-    def set_perfil(self, perfil: str):
-        self.perfil = perfil
 
     def set_tipo_pessoa(self, tipo_pessoa: str):
         if tipo_pessoa not in ("doador", "usuario"):
@@ -54,9 +50,6 @@ class Pessoa:
 
     def get_senha(self) -> str:
         return self.senha
-
-    def get_perfil(self) -> str:
-        return self.perfil
 
     def get_tipo_pessoa(self) -> str:
         return self.tipo_pessoa
