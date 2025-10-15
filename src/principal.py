@@ -1,5 +1,5 @@
 from utils import config
-from utils import SplashScreen
+from utils.splash_screen import SplashScreen
 from reports.relatorios import Relatorio
 from controller.controller_pessoa import Controller_Pessoa
 from controller.controller_campanha import Controller_Campanha

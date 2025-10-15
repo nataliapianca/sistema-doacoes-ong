@@ -3,6 +3,7 @@ from datetime import datetime
 from conexion.connection import PostgresQueries
 from model.doacao import Doacao
 from model.recibo import Recibo
+from controller.controller_recibo import Controller_Recibo
 from controller.controller_pessoa import Controller_Pessoa
 from controller.controller_campanha import Controller_Campanha
 

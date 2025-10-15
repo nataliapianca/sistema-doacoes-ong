@@ -1,5 +1,5 @@
-from src.model.pessoa import Pessoa
-from src.conexion.connection import PostgresQueries
+from model.pessoa import Pessoa
+from conexion.connection import PostgresQueries
 
 class Controller_Pessoa:
     def __init__(self):

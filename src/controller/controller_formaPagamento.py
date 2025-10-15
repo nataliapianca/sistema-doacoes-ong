@@ -1,4 +1,4 @@
-from controller.controller_campanha import Controller_Campanha
+from .controller_campanha import Controller_Campanha
 from controller.controller_pessoa import Controller_Pessoa
 from model.formaPagamento import FormaPagamento
 from conexion.connection import PostgresQueries
@@ -12,12 +12,14 @@ class Controller_FormaPagamento:
 
 
     def inserir_formaPagamento(self, postGree, id_campanha: int, id_pessoa:int, nome_forma:str) -> FormaPagamento:
-        self.listar_campanhas(postGree, need_connect= True) """aqui ele lista as campanhas, não sei se é necessário"""
+        self.listar_campanhas(postGree, need_connect= True) 
+        """aqui ele lista as campanhas, não sei se é necessário"""
         campanha = self.validar_campanha(postGree, id_campanha)
         if campanha is None:
             return None
         
-        self.listar_pessoas(postGree, need_connect= True) """aqui ele lista as pessoas, não sei se é necessário"""
+        self.listar_pessoas(postGree, need_connect= True) 
+        """aqui ele lista as pessoas, não sei se é necessário"""
 
         df_pessoa = postGree.sqlToDataFrame(f"select cpf from Pessoa where id_pessoa = '{id_pessoa}'")
         cpf_pessoa = df_pessoa.cpf[0]

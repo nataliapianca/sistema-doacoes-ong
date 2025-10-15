@@ -1,5 +1,5 @@
 from datetime import date
-from pessoa import Pessoa
+from .pessoa import Pessoa
 
 class Campanha:
     def __init__(self,
@@ -69,9 +69,6 @@ def is_ativa(self) -> bool:
 
 def get_formaPagamento(self) -> str:
     return self.formaPagamento
-
-
-
 
 
 def toString(self) -> str:

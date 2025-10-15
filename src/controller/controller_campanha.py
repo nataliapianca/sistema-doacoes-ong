@@ -1,9 +1,9 @@
 from datetime import date, datetime
-from controller_pessoa import Controller_Pessoa
+from .controller_pessoa import Controller_Pessoa
 from model.campanha import Campanha
 from conexion.connection import PostgresQueries
 from model.pessoa import Pessoa
-from controller_formaPagamento import Controller_FormaPagamento
+
 
 
 class Controller_Campanha:
