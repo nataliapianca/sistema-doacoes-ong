@@ -1,1 +1,1 @@
-from conexion.connection import conectar
+from connection import connect

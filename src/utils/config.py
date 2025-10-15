@@ -12,8 +12,8 @@ MENU_PRINCIPAL = """
 
 MENU_RELATORIOS = """
 -- Menu de Relatórios --
-1 - Relatório de Campanhas
-2 - Relatório de Pessoas com Endereço
+1 - Relatório de Campanhas - total arrecadado e o número de doações para cada campanha ativa
+2 - Relatório de Doações - doadores que contribuíram para quais campanhas, e qual foi o valor doado por eles em cada transação
 """
 
 MENU_ENTIDADES = """

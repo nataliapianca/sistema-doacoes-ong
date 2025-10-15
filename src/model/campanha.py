@@ -1,29 +1,27 @@
 from datetime import date
-import pessoa
+from pessoa import Pessoa
 
 class Campanha:
     def __init__(self,
                  id_campanha: int = None,
-                 pessoa: pessoa = None,
+                 pessoa: Pessoa = None,
                  nome: str = None,
                  descricao: str = None,
                  data_inicio: date = None,
                  data_fim: date = None,
-                 status: bool = None,
-                 formaPagamento: str = None
+                 formaPagamento: str = None,
                 ):
-        self.set_id_campanha(id_campanha),
-        self.set_pessoa(pessoa.get_pessoa() if pessoa else None),
-        self.set_nome(nome),
-        self.set_descricao(descricao),
-        self.set_data_inicio(data_inicio),
+        self.id_campanha = id_campanha
+        self.set_pessoa(pessoa.get_pessoa() if pessoa else None)
+        self.set_nome(nome)
+        self.set_descricao(descricao)
+        self.set_data_inicio(data_inicio)
         self.set_data_fim(data_fim)
+        self.set_formaPagamento(formaPagamento)
+        self.ativar()
        
-
-def set_id_campanha(self, id_campanha: int):
-    self.id_campanha = id_campanha
     
-def set_pessoa(self, pessoa: pessoa):
+def set_pessoa(self, pessoa: Pessoa):
     self.pessoa = pessoa
 
 def set_nome(self, nome: str):
@@ -38,18 +36,20 @@ def set_data_inicio(self, data_inicio: date):
 def set_data_fim(self, data_fim: date):
     self.data_fim = data_fim
 
-def set_status(self, status: bool):
-    self.status = status
-
 def set_formaPagamento(self, formaPagamento: str):
     self.formaPagamento = formaPagamento
 
+def ativar(self):
+    self.status = True
+
+def desativar(self):
+    self.status = False
 
 
 def get_id_campanha(self) -> int:
     return self.id_campanha
 
-def get_pessoa(self) -> pessoa:
+def get_pessoa(self) -> Pessoa:
     return self.pessoa
 
 def get_nome(self) -> str:
@@ -69,6 +69,9 @@ def is_ativa(self) -> bool:
 
 def get_formaPagamento(self) -> str:
     return self.formaPagamento
+
+
+
 
 
 def toString(self) -> str:
