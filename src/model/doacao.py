@@ -1,6 +1,6 @@
 from decimal import Decimal
 from datetime import datetime
-from recibo import Recibo
+
 
 
 class Doacao:
@@ -10,7 +10,7 @@ class Doacao:
                  id_campanha: int = None,
                  valor: Decimal = None,
                  data_doacao: datetime = None,
-                 recibo: Recibo = None):
+                 recibo: "Recibo" = None):
 
         self.set_id_doacao(id_doacao)
         self.set_id_pessoa(id_pessoa)
@@ -34,7 +34,7 @@ class Doacao:
     def set_data_doacao(self, data_doacao: datetime):
         self._data_doacao = data_doacao if data_doacao is not None else datetime.now() # define data atual se não for passada
         
-    def set_recibo(self, recibo: Recibo):
+    def set_recibo(self, recibo: "Recibo"):
         self._recibo = recibo
 
     def get_id_doacao(self) -> int:
@@ -52,7 +52,7 @@ class Doacao:
     def get_data_doacao(self) -> datetime:
         return self._data_doacao
 
-    def get_recibo(self) -> Recibo:
+    def get_recibo(self) -> "Recibo":
         return self._recibo
 
     def to_string(self) -> str:

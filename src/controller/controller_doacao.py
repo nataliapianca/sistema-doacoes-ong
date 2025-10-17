@@ -19,7 +19,6 @@ class Controller_Doacao:
         postGree.connect()
 
         print("\n--- Nova Doação ---")
-        self.control_pessoa.listar_pessoas(postGree, need_connect=True)
         cpf_pessoa = input("Digite o CPF do doador: ")
         pessoa = self.control_pessoa.validar_pessoa(postGree, cpf_pessoa)
         if pessoa is None:
@@ -27,7 +26,7 @@ class Controller_Doacao:
             return None
 
         id_pessoa = pessoa.get_id_pessoa()
-        self.control_campanha.listar_pessoas(postGree, need_connect=True)
+        
         id_campanha = int(input("Digite o ID da campanha: "))
 
         valor = Decimal(input("Digite o valor da doação: "))

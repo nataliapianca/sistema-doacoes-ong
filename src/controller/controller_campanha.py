@@ -74,9 +74,6 @@ class Controller_Campanha:
 
         if self.verifica_existencia_campanha(postGree, id_campanha):
 
-            self.listar_campanhas_pessoas(postGree, need_connect=True)
-            print()
-
             cpf_pessoa = str(input("Digite o CPF da Pessoa Responsável: "))
             pessoa = self.validar_pessoa(postGree, cpf_pessoa)
             if pessoa == None:
@@ -95,7 +92,7 @@ class Controller_Campanha:
             descricao = df_campanha.descricao[0]
             data_inicio = df_campanha.data_inicio[0]
             data_fim = df_campanha.data_fim[0]
-            formaPagamento = df_campanha.formaPagamento[0]
+            formaPagamento = df_campanha.formapagamento[0]
 
             if (input("Você quer alterar o nome da Campanha?(s/n) ").lower() == "s"):
                 nome = str(input("Informe o nome da Campanha: "))
@@ -167,7 +164,7 @@ class Controller_Campanha:
                 postGree.write(
                     f"update Campanha set status = False where id_campanha = {id_campanha}")
                 campanha_desativada = Campanha(id_campanha, pessoa, df_campanha.nome[0], df_campanha.descricao[
-                                               0], df_campanha.data_inicio[0], df_campanha.data_fim[0], df_campanha.formaPagamento[0])
+                                               0], df_campanha.data_inicio[0], df_campanha.data_fim[0], df_campanha.formapagamento[0])
                 
                 campanha_desativada.desativar()
 
@@ -191,6 +188,7 @@ class Controller_Campanha:
         SELECT 
             c.id_campanha,
             c.nome AS nome_campanha,
+            c.descricao,
             c.data_inicio,
             c.data_fim,
             c.status,

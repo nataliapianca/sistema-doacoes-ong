@@ -49,8 +49,7 @@ class Controller_FormaPagamento:
             print(f"Erro ao inserir forma de Pagamento: {e}.")
             return None
 
-        
-
+    
     def atualizar_formaPagamento(self, id_campanha: int, id_pessoa_respon: int, nome_forma: str) -> bool:
         postGree = PostgresQueries(can_write=True)
         postGree.connect()

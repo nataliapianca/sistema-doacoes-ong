@@ -1,6 +1,5 @@
 from datetime import datetime
 from uuid import UUID, uuid4
-from doacao import Doacao
 
 
 class Recibo:
@@ -8,7 +7,7 @@ class Recibo:
                  id_recibo: int = None,
                  data_emissao: datetime = None,
                  codigo_validacao: UUID = None,
-                 doacao: Doacao = None):
+                 doacao: "Doacao" = None):
         self.set_id_recibo(id_recibo)
         self.set_data_emissao(data_emissao)
         self.set_codigo_validacao(codigo_validacao)
@@ -23,7 +22,7 @@ class Recibo:
     def set_codigo_validacao(self, codigo_validacao: UUID):
         self._codigo_validacao = codigo_validacao if codigo_validacao is not None else uuid4()
 
-    def set_doacao(self, doacao: Doacao):
+    def set_doacao(self, doacao: "Doacao"):
         self._doacao = doacao
 
     def get_id_recibo(self) -> int:
@@ -35,7 +34,7 @@ class Recibo:
     def get_codigo_validacao(self) -> UUID:
         return self._codigo_validacao
 
-    def get_doacao(self) -> Doacao:
+    def get_doacao(self) -> "Doacao":
         return self._doacao
 
 def to_string(self) -> str:
