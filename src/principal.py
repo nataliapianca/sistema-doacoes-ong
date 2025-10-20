@@ -33,6 +33,7 @@ def inserir(opcao_inserir: int = 0):
         if tipo_usuario == "doador":
             print("❌ Acesso negado: doadores não podem criar campanhas.")
             return
+        relatorio.get_relatorio_campanhas()
         ctrl_campanha.inserir_campanha()
     elif opcao_inserir == 3:
         relatorio.get_relatorio_doacoes()
