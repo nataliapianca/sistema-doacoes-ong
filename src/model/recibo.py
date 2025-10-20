@@ -1,5 +1,10 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from datetime import datetime
 from uuid import UUID, uuid4
+
+if TYPE_CHECKING:
+    from .doacao import Doacao
 
 
 class Recibo:
@@ -7,7 +12,7 @@ class Recibo:
                  id_recibo: int = None,
                  data_emissao: datetime = None,
                  codigo_validacao: UUID = None,
-                 doacao: "Doacao" = None):
+                 doacao: 'Doacao' = None):
         self.set_id_recibo(id_recibo)
         self.set_data_emissao(data_emissao)
         self.set_codigo_validacao(codigo_validacao)
@@ -22,8 +27,11 @@ class Recibo:
     def set_codigo_validacao(self, codigo_validacao: UUID):
         self._codigo_validacao = codigo_validacao if codigo_validacao is not None else uuid4()
 
-    def set_doacao(self, doacao: "Doacao"):
+    def set_doacao(self, doacao: 'Doacao'):
         self._doacao = doacao
+
+    def get_doacao(self) -> 'Doacao':
+        return self._doacao
 
     def get_id_recibo(self) -> int:
         return self._id_recibo
@@ -34,11 +42,11 @@ class Recibo:
     def get_codigo_validacao(self) -> UUID:
         return self._codigo_validacao
 
-    def get_doacao(self) -> "Doacao":
-        return self._doacao
-
-def to_string(self) -> str:
+    def to_string(self) -> str:
         data_formatada = self.get_data_emissao().strftime('%d/%m/%Y %H:%M:%S')
         id_doacao = self.get_doacao().get_id_doacao() if self.get_doacao() else "N/A"
         
-        return (f"ID: {self.get_id_recibo()} | "f"Data de Emissão: {data_formatada} | "f"Código: {self.get_codigo_validacao()} | "f"ID Doação: {id_doacao}")
+        return (f"ID: {self.get_id_recibo()} | "
+                f"Data de Emissão: {data_formatada} | "
+                f"Código: {self.get_codigo_validacao()} | "
+                f"ID Doação: {id_doacao}")

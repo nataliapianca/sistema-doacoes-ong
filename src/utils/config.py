@@ -20,7 +20,6 @@ MENU_ENTIDADES = """
 -- Escolha uma entidade --
 1 - Pessoa
 2 - Campanha
-3 - Doação
 """
 
 MENU_ATUALIZAR_ENTIDADES = """
