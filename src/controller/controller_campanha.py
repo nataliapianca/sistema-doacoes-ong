@@ -13,9 +13,6 @@ class Controller_Campanha:
         from controller.controller_formaPagamento import Controller_FormaPagamento
         postGree = PostgresQueries()
 
-        self.listar_campanhas_pessoas(postGree, need_connect=True)
-        print()
-
         cpf_pessoa = str(input("Digite o CPF da Pessoa: "))
         pessoa = self.validar_pessoa(postGree, cpf_pessoa)
         if pessoa == None:
