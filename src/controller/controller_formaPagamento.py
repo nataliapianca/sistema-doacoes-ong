@@ -1,4 +1,4 @@
-from .controller_campanha import Controller_Campanha
+from controller.controller_campanha import Controller_Campanha
 from controller.controller_pessoa import Controller_Pessoa
 from model.formaPagamento import FormaPagamento
 from conexion.connection import PostgresQueries
@@ -7,58 +7,55 @@ from model.campanha import Campanha
 
 class Controller_FormaPagamento:
     def __init__(self):
-        self.control_pessoa = Controller_Pessoa
-        self.control_campanha = Controller_Campanha
+        self.control_pessoa = Controller_Pessoa()
+        self.control_campanha = Controller_Campanha()
 
 
-    def inserir_formaPagamento(self, postGree, id_campanha: int, id_pessoa:int, nome_forma:str) -> FormaPagamento:
-        self.listar_campanhas(postGree, need_connect= True) 
-        """aqui ele lista as campanhas, não sei se é necessário"""
-        campanha = self.validar_campanha(postGree, id_campanha)
-        if campanha is None:
-            return None
-        
-        self.listar_pessoas(postGree, need_connect= True) 
-        """aqui ele lista as pessoas, não sei se é necessário"""
+    def inserir_formaPagamento(self, postGree: PostgresQueries, campanha: Campanha) -> FormaPagamento:
+        id_campanha = int(campanha.get_id_campanha())
 
-        df_pessoa = postGree.sqlToDataFrame(f"select cpf from Pessoa where id_pessoa = '{id_pessoa}'")
-        cpf_pessoa = df_pessoa.cpf[0]
+        pessoa = campanha.get_pessoa()
+        id_pessoa = int(pessoa.get_id_pessoa())
+
+        cpf_pessoa = pessoa.get_cpf()
 
         pessoa = self.validar_pessoa(postGree, cpf_pessoa)
         if pessoa is None:
+            print("Pessoa responsável inválida.")
             return None
+        
+        descricao = campanha.get_forma_pagamento()
 
+        dado = dict(id_campanha=id_campanha, id_pessoa=id_pessoa, descricao=descricao)
         cursor = postGree.connect()
-        output_value = cursor.var(int)
-
-        dado = dict(id_forma=output_value, id_campanha=id_campanha, id_pessoa=id_pessoa, nome_forma=nome_forma)
 
         try: 
             cursor.execute("""
-            begin
-                :id_forma := FORMAPAGAMENTO_ID_FORMAPAGAMENTO_SEQ.NEXTVAL;
-                insert into formaPagamento values(:id_forma, :id_campanha, :id_pessoa, :formaPagamento);
-            end;          
+            INSERT INTO formapagamento (id_campanha, id_pessoa, descricao) 
+            VALUES (%(id_campanha)s, %(id_pessoa)s, %(descricao)s)
+            RETURNING id_forma_pagamento;         
             """, dado)
 
-            id_forma = output_value.getvalue()
+            id_forma = cursor.fetchone()[0]
             postGree.conn.commit()
 
-            nova_formaPagamento = FormaPagamento(id_forma, campanha, pessoa, nome_forma)
+            forma_de_pagamento = FormaPagamento(id_forma, descricao,  campanha, pessoa)
 
-            print(nova_formaPagamento.toString())
-            return nova_formaPagamento
+            print("\nForma de pagamento cadastrada com sucesso!")
+            print(forma_de_pagamento.toString())
+            return forma_de_pagamento
+        
         except Exception as e:
             print(f"Erro ao inserir forma de Pagamento: {e}.")
             return None
 
-
+    
     def atualizar_formaPagamento(self, id_campanha: int, id_pessoa_respon: int, nome_forma: str) -> bool:
         postGree = PostgresQueries(can_write=True)
         postGree.connect()
         
         try:
-            postGree.write(f"update FormaPagamento set formaPagamento = '{nome_forma}' where id_campanha = '{id_campanha}' and id_pessoa = '{id_pessoa_respon}';")
+            postGree.write(f"update formapagamento set descricao = '{nome_forma}' where id_campanha = {id_campanha} and id_pessoa = {id_pessoa_respon};")
             return True
         except Exception as e:
             print(f"Erro ao salvar a forma de Pagamento: {e}")
@@ -70,7 +67,7 @@ class Controller_FormaPagamento:
             id_campanha_alvo = int(input("Informe o ID da Campanha: "))
             cpf_pessoa_respon = str(input("Informe o CPF da Pessoa Responsável (para identificação):"))
 
-            pessoa = self.control_pessoa.verifica_existencia_pessoa(postGree, cpf_pessoa_respon)
+            pessoa = self.validar_pessoa(postGree, cpf_pessoa_respon)
             if pessoa is None:
                 print("Pessoa Responsável não encontrada.")
                 return False
@@ -91,48 +88,26 @@ class Controller_FormaPagamento:
             return False
 
 
-    def listar_pessoas(self, postGree: PostgresQueries, need_connect:bool=False):
-        query = """
-               select id_campanha,
-               c.nome as nome_campanha,
-               c.data_inicio,
-               c.data_fim,
-               c.status,
-               d.id_doacao,
-               p.nome as nome_doador,
-               d.valor as valor_doacao,
-               d.data_doacao,
-               fp.formaPagamento as forma_pagamento_campanha,
-               from Campanha c
-               inner join Doacao d ON c.id_campanha = d.id_campanha
-               inner join pessoa p ON d.id_pessoa = p.id_pessoa
-               left join FormaPagamento fp ON d.id_campanha = fp.id_campanha AND d.id_pessoa = fp.id_pessoa
-               order by c.data_inicio DESC, nome_campanha, d.data_doacao;
-               """
-        if need_connect:
-           postGree.connect()
-        print(postGree.sqlToDataFrame(query))
-
-
-    def listar_campanhas(self, postGree: PostgresQueries, need_connect:bool=False):
+    def listar_campanhas_formaPag(self, postGree: PostgresQueries, need_connect:bool=False):
             query = """
-                    select fp.id_forma,
-                    fp.formapagamento AS forma_de_pagamento,
+                    select fp.id_forma_pagamento,
+                    fp.descricao AS forma_de_pagamento,
                     fp.id_campanha,
                     c.nome AS nome_campanha,
                     c.data_inicio,
-                    c.status
-                    from FormaPagamento fp
+                    c.status,
+                    fp.id_pessoa
+                    from formapagamento fp
                     inner join Campanha c ON fp.id_campanha = c.id_campanha
-                    order by c.nome, fp.formaPagamento;
+                    order by c.nome, fp.descricao;
                     """
             if need_connect:
                 postGree.connect()
             print(postGree.sqlToDataFrame(query))
     
 
-    def validar_pessoa(self, postGree: PostgresQueries, cpf_pessoa: int=None) -> Pessoa:
-        if self.control_pessoa.verifica_existencia_pessoa(postGree, cpf_pessoa):
+    def validar_pessoa(self, postGree: PostgresQueries, cpf_pessoa: str=None) -> Pessoa:
+        if not self.control_pessoa.verifica_existencia_pessoa(postGree, cpf_pessoa):
             print(f"A pessoa de CPF: {cpf_pessoa} informado não existe.")
             return None
         else:
@@ -147,37 +122,32 @@ class Controller_FormaPagamento:
             return pessoa
         
 
-    def validar_campanha(self, postGree: PostgresQueries, id_campanha: int=None) -> Campanha:
-        if not self.control_campanha.verifica_existencia_campanha(postGree, id_campanha):
-            print(f"A Campanha {id_campanha} informada não existe.")
-            return None
-    
+    def validar_campanha(self, postGree: PostgresQueries, id_campanha: int) -> Campanha:
         postGree.connect()
-        df_campanha = postGree.sqlToDataFrame(f"select id_campanha, id_pessoa, nome, descricao, data_inicio, data_fim, formaPagamento from campanha where id_campanha = '{id_campanha}'")
+
+        query_campanha = """SELECT c.id_campanha, c.nome, c.descricao, c.data_inicio, c.data_fim, c.formaPagamento, p.cpf 
+            FROM campanha c 
+            JOIN Pessoa p ON c.id_pessoa = p.id_pessoa
+            WHERE c.id_campanha = %s"""
+        
+        df_campanha = postGree.sqlToDataFrame(query_campanha, (id_campanha,))
 
         if df_campanha.empty:
-            print("Campanha encontrada, porém não foi possível recuperar os dados.")
-            return None
-        
-        id_pessoa = df_campanha.id_pessoa.values[0]
-        sql_cpf = f"select cpf from Pessoa where id_pessoa = '{id_pessoa}'"
-        df_pessoa = postGree.sqlToDataFrame(sql_cpf)
-
-        if df_pessoa.empty:
-            print("Erro: Pessoa responsável pela Campanha não encontrada.")
+            print("Campanha não encontrada com o ID informado.")
             return None
 
-        cpf_pessoa = df_pessoa.cpf.values[0]
+        cpf_pessoa = df_campanha.cpf.values[0]
+
         pessoa = self.validar_pessoa(postGree, cpf_pessoa)
-
         if pessoa is None:
             print("A Pessoa informada não é válida.")
             return None
 
-        campanha = Campanha(df_campanha.id_campanha[0], pessoa, df_campanha.nome[0], df_campanha.descricao[0], df_campanha.data_inicio[0], df_campanha.data_fim[0], df_campanha.formaPagament[0])
+        dados = df_campanha.iloc[0]
+        campanha = Campanha(dados.id_campanha[0], pessoa, dados.nome[0], dados.descricao[0], dados.data_inicio[0], dados.data_fim[0], dados.formaPagament[0])
         return campanha
     
 
     def verificar_existencia_formaPagamento(self, postGree: PostgresQueries, id_forma: int) -> bool:
-        df_formaPagamento = postGree.sqlToDataFrame(f"select id_forma from formaPagamento where id_forma = '{id_forma}'")
-        return df_formaPagamento.empty
+        df_formaPagamento = postGree.sqlToDataFrame(f"select id_forma from formaPagamento where id_forma = {id_forma}")
+        return not df_formaPagamento.empty

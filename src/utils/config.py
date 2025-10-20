@@ -22,6 +22,15 @@ MENU_ENTIDADES = """
 2 - Campanha
 """
 
+MENU_ATUALIZAR_ENTIDADES = """
+-- Escolha uma entidade --
+1 - Pessoa
+2 - Campanha
+3 - Doação
+4 - Forma de Pagamento
+"""
+
+
 QUERY_COUNT = 'SELECT COUNT(1) AS total_{tabela} FROM {tabela}'
 
 def clear_console(wait_time:int=1):

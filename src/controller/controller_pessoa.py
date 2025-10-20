@@ -123,12 +123,13 @@ class Controller_Pessoa:
         postgres.close()
         return pessoa_atualizada
 
+
 #delete refiz caso a pessoa esteja associada a uma campanha!!! NAO PODE EXCLUIR regra de negocio
     def excluir_pessoa(self):
         postgres = PostgresQueries(can_write=True)
         postgres.connect()
 
-        cpf = input("CPF da pessoa que deseja excluir: ").strip()
+        cpf = input("CPF da pessoa que deseja excluir(caso você seja doador, informe seu próprio CPF): ").strip()
 
         if not self.verifica_existencia_pessoa(postgres, cpf):
             print(f"CPF {cpf} não existe.")
@@ -141,7 +142,7 @@ class Controller_Pessoa:
             WHERE id_pessoa = (SELECT id_pessoa FROM pessoa WHERE cpf = '{cpf}');
         """)
         if not df_campanha.empty:
-            print("ssa pessoa está associada a uma ou mais campanhas e por isso não pode ser excluída.")
+            print("essa pessoa está associada a uma ou mais campanhas e por isso não pode ser excluída.")
             postgres.close()
             return None
 
@@ -172,3 +173,22 @@ class Controller_Pessoa:
     def verifica_existencia_pessoa(self, postgres: PostgresQueries, cpf: str) -> bool:
         df_pessoa = postgres.sqlToDataFrame(f"SELECT cpf FROM pessoa WHERE cpf = '{cpf}';")
         return not df_pessoa.empty
+
+
+    def validar_pessoa(self, postGree: PostgresQueries, cpf_pessoa: str = None) -> Pessoa:
+        if not self.verifica_existencia_pessoa(postGree, cpf_pessoa):
+            print(f"A pessoa de CPF: {cpf_pessoa} informado não existe.")
+            return None
+
+        postGree.connect()
+        df_pessoa = postGree.sqlToDataFrame(
+            f"select id_pessoa, nome, cpf, email, senha, tipo_pessoa from Pessoa where cpf = '{cpf_pessoa}'")
+
+        if df_pessoa.empty:
+            print("Erro interno: Pessoa não encontrada.")
+            return None
+
+        pessoa = Pessoa(df_pessoa.id_pessoa.values[0], df_pessoa.nome.values[0], cpf_pessoa,
+                        df_pessoa.email.values[0], df_pessoa.senha.values[0], df_pessoa.tipo_pessoa.values[0])
+
+        return pessoa

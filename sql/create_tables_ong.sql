@@ -22,7 +22,7 @@ CREATE TABLE Campanha (
     descricao TEXT NOT NULL,
     data_inicio DATE NOT NULL,
     data_fim DATE NOT NULL,
-    statos BOOLEAN DEFAULT TRUE NOT NULL,
+    status BOOLEAN DEFAULT TRUE NOT NULL,
     id_pessoa INT NOT NULL REFERENCES Pessoa(id_pessoa),
     formaPagamento VARCHAR(30) NOT NULL
 );

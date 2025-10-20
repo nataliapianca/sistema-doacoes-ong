@@ -1,6 +1,8 @@
 SELECT
+    d.id_doacao,
     p.nome AS nome_doador,
     p.cpf,
+    c.id_campanha,
     c.nome AS nome_campanha,
     d.valor AS valor_doacao,
     d.data_doacao
