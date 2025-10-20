@@ -1,5 +1,8 @@
 from model.pessoa import Pessoa
 from conexion.connection import PostgresQueries
+from model.doacao import Doacao
+from model.recibo import Recibo
+from typing import List
 
 class Controller_Pessoa:
     def __init__(self):
@@ -165,9 +168,6 @@ class Controller_Pessoa:
 
         postgres.close()
         return pessoa_excluida
-
-
-
 
     def verifica_existencia_pessoa(self, postgres: PostgresQueries, cpf: str) -> bool:
         df_pessoa = postgres.sqlToDataFrame(f"SELECT cpf FROM pessoa WHERE cpf = '{cpf}';")
