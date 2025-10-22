@@ -21,6 +21,7 @@ ctrl_campanha = Controller_Campanha()
 ctrl_doacao = Controller_Doacao()
 ctrl_formaPagamento = Controller_FormaPagamento()
 login = ValidaLogin()
+from utils import logger
 
 
 def admin_menu_loop(nome_usuario: str, id_pessoa_logado: int):
@@ -132,7 +133,13 @@ def main():
             splash_shown = True
 
         # Tela inicial de login/cadastro
-        resultado = login.iniciar_programa()
+        try:
+            resultado = login.iniciar_programa()
+        except Exception as e:
+            logger.log_exception(e, context='iniciar_programa')
+            print("Ocorreu um erro inesperado. Você será redirecionado para a tela inicial.")
+            config.clear_console()
+            continue
         # iniciar_programa retorna (tipo, nome, id_pessoa)
         if not resultado:
             # Em caso de retorno inesperado, reinicia a tela inicial
