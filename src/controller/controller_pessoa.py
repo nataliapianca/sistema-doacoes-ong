@@ -58,16 +58,27 @@ class Controller_Pessoa:
         return nova_pessoa
 
 #update REFEITO
-    def atualizar_pessoa(self) -> Pessoa:
+    def atualizar_pessoa(self, id_pessoa_logado: int = None) -> Pessoa:
         postgres = PostgresQueries(can_write=True)
         postgres.connect()
 
-        cpf = input("CPF da pessoa para atualizar: ").strip()
+        # Se um id_pessoa_logado foi passado, permitimos que o usuário atualize apenas seu próprio registro
+        if id_pessoa_logado is not None:
+            # obtemos o CPF a partir do id
+            df_self = postgres.sqlToDataFrame(f"SELECT cpf FROM pessoa WHERE id_pessoa = {id_pessoa_logado};")
+            if df_self.empty:
+                print("Usuário logado não encontrado no sistema.")
+                postgres.close()
+                return None
+            cpf = df_self.cpf.values[0]
+            print(f"Atualizando seu perfil (CPF: {cpf})")
+        else:
+            cpf = input("CPF da pessoa para atualizar: ").strip()
 
-        if not self.verifica_existencia_pessoa(postgres, cpf):
-            print(f"O CPF {cpf} não existe.")
-            postgres.close()
-            return None
+            if not self.verifica_existencia_pessoa(postgres, cpf):
+                print(f"O CPF {cpf} não existe.")
+                postgres.close()
+                return None
 
         print("\nQual dado deseja alterar?")
         print("1 - Nome")

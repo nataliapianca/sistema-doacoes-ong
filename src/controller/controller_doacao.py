@@ -14,18 +14,22 @@ class Controller_Doacao:
         self.control_campanha = Controller_Campanha()
 
     # Inserir nova doação
-    def inserir_doacao(self) -> Doacao:
+    def inserir_doacao(self, id_pessoa_logado: int = None) -> Doacao:
         postGree = PostgresQueries(can_write=True)
         postGree.connect()
 
         print("\n--- Nova Doação ---")
-        cpf_pessoa = input("Digite o CPF do doador: ")
-        pessoa = self.control_pessoa.validar_pessoa(postGree, cpf_pessoa)
-        if pessoa is None:
-            print("Pessoa não encontrada.")
-            return None
+        # Se o id do doador já for conhecido (usuário logado), não pedir CPF
+        if id_pessoa_logado is None:
+            cpf_pessoa = input("Digite o CPF do doador: ")
+            pessoa = self.control_pessoa.validar_pessoa(postGree, cpf_pessoa)
+            if pessoa is None:
+                print("Pessoa não encontrada.")
+                return None
 
-        id_pessoa = pessoa.get_id_pessoa()
+            id_pessoa = pessoa.get_id_pessoa()
+        else:
+            id_pessoa = id_pessoa_logado
         
         id_campanha = int(input("Digite o ID da campanha: "))
 
@@ -43,9 +47,10 @@ class Controller_Doacao:
         """
         postGree.write(sql_insert)
 
-        # Cria o recibo automaticamente (1:1)
+        # Cria o recibo automaticamente (1:1). Passa id_pessoa para a criação do recibo
         control_recibo = Controller_Recibo()
-        recibo = control_recibo.inserir_recibo(postGree, id_doacao)
+        # Passa id_pessoa e id_campanha, ambos obrigatórios na tabela recibo
+        recibo = control_recibo.inserir_recibo(postGree, id_doacao, id_pessoa, id_campanha)
 
         nova_doacao = Doacao(
             id_doacao=id_doacao,

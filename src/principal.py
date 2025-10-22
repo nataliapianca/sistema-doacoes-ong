@@ -3,11 +3,17 @@ from utils.splash_screen import SplashScreen
 from reports.relatorios import Relatorio
 from controller.controller_pessoa import Controller_Pessoa
 from controller.controller_campanha import Controller_Campanha
-from controller.valida_login import ValidaLogin  
+from controller.valida_login import ValidaLogin
 from controller.controller_doacao import Controller_Doacao
 from controller.controller_formaPagamento import Controller_FormaPagamento
 from conexion.connection import PostgresQueries
 
+# melhoria de UI: cores
+from colorama import init as colorama_init, Fore, Style
+colorama_init(autoreset=True)
+
+
+# Instâncias de controllers e utilitários
 tela_inicial = SplashScreen()
 relatorio = Relatorio()
 ctrl_pessoa = Controller_Pessoa()
@@ -15,131 +21,139 @@ ctrl_campanha = Controller_Campanha()
 ctrl_doacao = Controller_Doacao()
 ctrl_formaPagamento = Controller_FormaPagamento()
 login = ValidaLogin()
-postGree = PostgresQueries()
 
-def reports(opcao_relatorio: int = 0):
-    if opcao_relatorio == 1:
-        relatorio.get_relatorio_campanhas()
-    elif opcao_relatorio == 2:
-        relatorio.get_relatorio_doacoes()
 
-def inserir(opcao_inserir: int = 0):
-    if opcao_inserir == 1:
-        if tipo_usuario == "doador":
-            print("❌ Acesso negado: doadores não podem criar pessoas.")
-            return
-        ctrl_pessoa.inserir_pessoa()
-    elif opcao_inserir == 2:
-        if tipo_usuario == "doador":
-            print("❌ Acesso negado: doadores não podem criar campanhas.")
-            return
-        relatorio.get_relatorio_campanhas()
-        ctrl_campanha.inserir_campanha()
-    elif opcao_inserir == 3:
-        relatorio.get_relatorio_doacoes()
-        ctrl_doacao.inserir_doacao()
+def admin_menu_loop(nome_usuario: str, id_pessoa_logado: int):
+    """Loop de menu para usuários do tipo 'usuario' (administrador)."""
+    while True:
+        login.menu_usuario(nome_usuario)
+        opc = input("Escolha uma opção: ").strip()
 
-def atualizar(opcao_atualizar: int = 0):
-    if opcao_atualizar == 1:
-        relatorio.get_relatorio_pessoas()
-        ctrl_pessoa.atualizar_pessoa()
-    elif opcao_atualizar == 2:
-        if tipo_usuario == "doador":
-            print("❌ Acesso negado: doadores não podem atualizar campanhas.")
-            return
-        relatorio.get_relatorio_campanhas()
-        ctrl_campanha.atualizar_campanha()
-    elif opcao_atualizar == 3:
-        ctrl_doacao.listar_doacoes(postGree, need_connect=True)
-        ctrl_doacao.atualizar_doacao()
-    elif opcao_atualizar == 4:
-        if tipo_usuario == "doador":
-            print("❌ Acesso negado: doadores não podem atualizar a forma de pagamento de uma campanha.")
-            return
-        ctrl_formaPagamento.listar_campanhas_formaPag(postGree, need_connect=True)
-        ctrl_formaPagamento.executar_atualizar_formaPagamento(postGree)
+        if opc == '1':
+            # Criar campanha
+            ctrl_campanha.inserir_campanha()
 
-def excluir(opcao_excluir: int = 0):
-    if opcao_excluir == 1:
-        if tipo_usuario == "usuario":
+        elif opc == '2':
+            # Ver relatórios (submenu simples)
+            print("\n1 - Relatório de campanhas\n2 - Relatório de doações\n3 - Relatório de pessoas")
+            sub = input("Escolha: ").strip()
+            if sub == '1':
+                relatorio.get_relatorio_campanhas()
+            elif sub == '2':
+                relatorio.get_relatorio_doacoes()
+            elif sub == '3':
+                relatorio.get_relatorio_pessoas()
+            else:
+                print("Opção inválida.")
+
+        elif opc == '3':
+            # Fazer doação (admin pode doar como ele mesmo)
+            # Exibir relatório de campanhas antes da doação
+            relatorio.get_relatorio_campanhas()
+            ctrl_doacao.inserir_doacao(id_pessoa_logado=id_pessoa_logado)
+
+        elif opc == '4':
+            # Atualizar próprio perfil
+            ctrl_pessoa.atualizar_pessoa(id_pessoa_logado=id_pessoa_logado)
+
+        elif opc == '5':
+            # Gerenciar CRUD de pessoas (admin tem acesso completo)
+            # Exibir relatório de pessoas antes do CRUD
             relatorio.get_relatorio_pessoas()
-        
-        ctrl_pessoa.excluir_pessoa()
-        
-    elif opcao_excluir == 2:
-        if tipo_usuario == "doador":
-            print("❌ Acesso negado: doadores não podem desativar campanhas.")
-            return
-        relatorio.get_relatorio_campanhas()
-        ctrl_campanha.desativar_campanha()
-    elif opcao_excluir == 3:
-        if tipo_usuario == "doador":
-            print("❌ Acesso negado: doadores não podem excluir doações.")
-            return
-        ctrl_doacao.listar_doacoes(postGree, need_connect=True)
-        ctrl_doacao.excluir_doacao()
+            print("\n1 - Inserir pessoa\n2 - Listar pessoas\n3 - Atualizar pessoa\n4 - Excluir pessoa")
+            s = input("Escolha: ").strip()
+            if s == '1':
+                ctrl_pessoa.inserir_pessoa()
+            elif s == '2':
+                relatorio.get_relatorio_pessoas()
+            elif s == '3':
+                # admin escolhe CPF para atualizar
+                ctrl_pessoa.atualizar_pessoa()
+            elif s == '4':
+                ctrl_pessoa.excluir_pessoa()
+            else:
+                print("Opção inválida.")
 
-def run():
-    print(tela_inicial.get_updated_screen())
-    input("\nPressione Enter para continuar...")
-    config.clear_console()
+        elif opc == '0':
+            # Sair (logout)
+            print("Saindo da conta...")
+            # Indica que o usuário fez logout
+            return True
+        else:
+            print("Opção inválida. Tente novamente.")
+    # Se por alguma razão o loop terminar, não foi logout
+    return False
 
-    #  Etapa de Login ou Cadastro
-tipo_usuario, nome_usuario = login.iniciar_programa()
+
+def donor_menu_loop(nome_usuario: str, id_pessoa_logado: int):
+    """Loop de menu para doadores."""
+    while True:
+        login.menu_doador(nome_usuario)
+        opc = input("Escolha uma opção: ").strip()
+
+        if opc == '1':
+            # Visualizar relatórios (campanhas e doações)
+            print("\n1 - Relatório de campanhas\n2 - Relatório de doações")
+            sub = input("Escolha: ").strip()
+            if sub == '1':
+                relatorio.get_relatorio_campanhas()
+            elif sub == '2':
+                relatorio.get_relatorio_doacoes()
+            else:
+                print("Opção inválida.")
+
+        elif opc == '2':
+            # Atualizar apenas o próprio cadastro
+            ctrl_pessoa.atualizar_pessoa(id_pessoa_logado=id_pessoa_logado)
+
+        elif opc == '3':
+            # Fazer doação usando o perfil logado
+            # Exibir relatório de campanhas antes da doação
+            relatorio.get_relatorio_campanhas()
+            ctrl_doacao.inserir_doacao(id_pessoa_logado=id_pessoa_logado)
+
+        elif opc == '0':
+            print("Saindo da conta...")
+            return True
+        else:
+            print("Opção inválida. Tente novamente.")
+    return False
 
 
-while True:
-    print(config.MENU_PRINCIPAL)
+def main():
+    splash_shown = False
 
-    try:
-        opcao = int(input("Escolha uma opção [1-5]: "))
-    except ValueError:
-        print("Entrada inválida. Digite um número.")
-        continue
+    while True:
+        # Mostrar splash screen apenas na primeira vez que o programa é iniciado
+        if not splash_shown:
+            print(tela_inicial.get_updated_screen())
+            input("\nPressione Enter para continuar...")
+            config.clear_console()
+            splash_shown = True
 
-    config.clear_console()
+        # Tela inicial de login/cadastro
+        resultado = login.iniciar_programa()
+        # iniciar_programa retorna (tipo, nome, id_pessoa)
+        if not resultado:
+            # Em caso de retorno inesperado, reinicia a tela inicial
+            continue
+        tipo_usuario, nome_usuario, id_pessoa_logado = resultado
 
-    if opcao == 1:
-        print(config.MENU_RELATORIOS)
-        try:
-            opcao_relatorio = int(input("Escolha uma opção: "))
-            reports(opcao_relatorio)
-        except ValueError:
-            print("Entrada inválida.")
+        # Fluxo por tipo de usuário
+        logged_out = False
+        if tipo_usuario == 'usuario':
+            logged_out = admin_menu_loop(nome_usuario, id_pessoa_logado)
+        elif tipo_usuario == 'doador':
+            logged_out = donor_menu_loop(nome_usuario, id_pessoa_logado)
+        else:
+            print(f"Tipo de usuário desconhecido: {tipo_usuario}. Voltando à tela inicial.")
 
-    elif opcao == 2:  # Inserir
-        print(config.MENU_ENTIDADES)
-        try:
-            opcao_inserir = int(input("Escolha uma opção: "))
-            inserir(opcao_inserir)
-        except ValueError:
-            print("Entrada inválida.")
+        # Ao sair do menu do usuário (logout), retorna para a tela de login
+        # Se o usuário deslogou, queremos que o splash apareça novamente
+        if logged_out:
+            splash_shown = False
+        config.clear_console()
 
-    elif opcao == 3:  # Atualizar
-        print(config.MENU_ATUALIZAR_ENTIDADES)
-        try:
-            opcao_atualizar = int(input("Escolha uma opção: "))
-            atualizar(opcao_atualizar)
-        except ValueError:
-            print("Entrada inválida.")
 
-    elif opcao == 4:  # Excluir
-        print(config.MENU_ENTIDADES)
-        try:
-            opcao_excluir = int(input("Escolha uma opção: "))
-            excluir(opcao_excluir)
-        except ValueError:
-            print("Entrada inválida.")
-
-    elif opcao == 5:
-        print("Obrigado por utilizar o sistema!")
-        exit(0)
-
-    else:
-        print("Opção inválida. Tente novamente.")
-
-    input("\nPressione Enter para continuar...")
-    config.clear_console()
-
-    if __name__ == "__main__":
-        run()
+if __name__ == '__main__':
+    main()
