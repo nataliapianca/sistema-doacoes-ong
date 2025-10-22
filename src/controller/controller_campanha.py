@@ -11,11 +11,11 @@ class Controller_Campanha:
 
     def inserir_campanha(self) -> Campanha:
         from controller.controller_formaPagamento import Controller_FormaPagamento
-        postGree = PostgresQueries()
+        postGree = PostgresQueries(can_write=True)
 
         cpf_pessoa = str(input("Digite o CPF da Pessoa: "))
         pessoa = self.validar_pessoa(postGree, cpf_pessoa)
-        if pessoa == None:
+        if pessoa is None:
             return None
 
         id_pessoa = int(pessoa.get_id_pessoa())
@@ -32,34 +32,42 @@ class Controller_Campanha:
         forma_de_pagamento = str(
             input("Informa a forma de Pagamento(obs* Apenas uma): "))
 
-        cursor = postGree.connect()
-        cursor.execute("SELECT nextval('CAMPANHA_ID_CAMPANHA_SEQ')")
-        id_campanha_pk = cursor.fetchone()[0]
+        # conectar e inserir usando RETURNING para obter id gerado
+        postGree.connect()
+        insert_sql = """
+        INSERT INTO Campanha (id_pessoa, nome, descricao, data_inicio, data_fim, formaPagamento)
+        VALUES (%(id_pessoa)s, %(nome)s, %(descricao)s, %(data_inicio)s, %(data_fim)s, %(forma_de_pagamento)s)
+        RETURNING id_campanha;
+        """
 
+        params = dict(id_pessoa=id_pessoa, nome=nome, descricao=descricao,
+                      data_inicio=data_inicio, data_fim=data_fim, forma_de_pagamento=forma_de_pagamento)
 
-        dado = dict(id_campanha=id_campanha_pk, id_pessoa=id_pessoa, nome=nome,
-                    descricao=descricao, data_inicio=data_inicio, data_fim=data_fim, forma_de_pagamento=forma_de_pagamento)
-        cursor.execute("""
-        INSERT INTO Campanha (id_campanha, id_pessoa, nome, descricao, data_inicio, data_fim, formapagamento) 
-        VALUES (%(id_campanha)s, %(id_pessoa)s, %(nome)s, %(descricao)s, %(data_inicio)s, %(data_fim)s, %(forma_de_pagamento)s);         
-        """, dado)
-
-        postGree.conn.commit()
+        try:
+            postGree.cur.execute(insert_sql, params)
+            id_campanha_pk = postGree.cur.fetchone()[0]
+            postGree.conn.commit()
+        except Exception as e:
+            print(f"Erro ao inserir campanha: {e}")
+            postGree.close()
+            return None
 
         nova_campanha = Campanha(id_campanha_pk, pessoa, nome, descricao, data_inicio, data_fim, forma_de_pagamento)
 
-        """tenho que criar a forma Pagamento só depois de ter criado a Campanha, se não dá conflito"""
+        # criar forma de pagamento vinculada
         control_formaPagamento = Controller_FormaPagamento()
         formaPagamento_obj = control_formaPagamento.inserir_formaPagamento(
             postGree, nova_campanha)
 
         if formaPagamento_obj is None:
             print("Erro ao adicionar a forma de pagamento")
+            postGree.close()
             return None
-        
+
         print("\nCampanha criada com sucesso!")
         print(nova_campanha.toString())
 
+        postGree.close()
         return nova_campanha
 
     def atualizar_campanha(self) -> Campanha:

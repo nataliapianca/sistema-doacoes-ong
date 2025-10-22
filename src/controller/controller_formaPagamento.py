@@ -1,4 +1,3 @@
-from controller.controller_campanha import Controller_Campanha
 from controller.controller_pessoa import Controller_Pessoa
 from model.formaPagamento import FormaPagamento
 from conexion.connection import PostgresQueries
@@ -8,7 +7,8 @@ from model.campanha import Campanha
 class Controller_FormaPagamento:
     def __init__(self):
         self.control_pessoa = Controller_Pessoa()
-        self.control_campanha = Controller_Campanha()
+        # Controller_Campanha pode causar import circular se importado no topo;
+        # importe localmente quando necessário.
 
 
     def inserir_formaPagamento(self, postGree: PostgresQueries, campanha: Campanha) -> FormaPagamento:
@@ -26,25 +26,32 @@ class Controller_FormaPagamento:
         
         descricao = campanha.get_forma_pagamento()
 
-        dado = dict(id_campanha=id_campanha, id_pessoa=id_pessoa, descricao=descricao)
-        cursor = postGree.connect()
+        params = dict(id_campanha=id_campanha, id_pessoa=id_pessoa, descricao=descricao)
 
-        try: 
-            cursor.execute("""
-            INSERT INTO formapagamento (id_campanha, id_pessoa, descricao) 
-            VALUES (%(id_campanha)s, %(id_pessoa)s, %(descricao)s)
-            RETURNING id_forma_pagamento;         
-            """, dado)
+        # use cursor existente ou conecte se necessário
+        if postGree.cur is None:
+            cursor = postGree.connect()
+        else:
+            cursor = postGree.cur
+
+        try:
+            cursor.execute(
+                """
+                INSERT INTO formapagamento (id_campanha, id_pessoa, descricao)
+                VALUES (%(id_campanha)s, %(id_pessoa)s, %(descricao)s)
+                RETURNING id_forma_pagamento;
+                """,
+                params,
+            )
 
             id_forma = cursor.fetchone()[0]
             postGree.conn.commit()
 
-            forma_de_pagamento = FormaPagamento(id_forma, descricao,  campanha, pessoa)
+            forma_de_pagamento = FormaPagamento(id_forma, descricao, campanha, pessoa)
 
             print("\nForma de pagamento cadastrada com sucesso!")
             print(forma_de_pagamento.toString())
             return forma_de_pagamento
-        
         except Exception as e:
             print(f"Erro ao inserir forma de Pagamento: {e}.")
             return None
@@ -124,13 +131,14 @@ class Controller_FormaPagamento:
 
     def validar_campanha(self, postGree: PostgresQueries, id_campanha: int) -> Campanha:
         postGree.connect()
+        query_campanha = f"""
+            SELECT c.id_campanha, c.nome, c.descricao, c.data_inicio, c.data_fim, c.formapagamento AS formaPagamento, p.cpf
+            FROM campanha c
+            JOIN pessoa p ON c.id_pessoa = p.id_pessoa
+            WHERE c.id_campanha = {id_campanha}
+        """
 
-        query_campanha = """SELECT c.id_campanha, c.nome, c.descricao, c.data_inicio, c.data_fim, c.formaPagamento, p.cpf 
-            FROM campanha c 
-            JOIN Pessoa p ON c.id_pessoa = p.id_pessoa
-            WHERE c.id_campanha = %s"""
-        
-        df_campanha = postGree.sqlToDataFrame(query_campanha, (id_campanha,))
+        df_campanha = postGree.sqlToDataFrame(query_campanha)
 
         if df_campanha.empty:
             print("Campanha não encontrada com o ID informado.")
@@ -144,10 +152,11 @@ class Controller_FormaPagamento:
             return None
 
         dados = df_campanha.iloc[0]
-        campanha = Campanha(dados.id_campanha[0], pessoa, dados.nome[0], dados.descricao[0], dados.data_inicio[0], dados.data_fim[0], dados.formaPagament[0])
+        campanha = Campanha(dados.id_campanha, pessoa, dados.nome, dados.descricao, dados.data_inicio, dados.data_fim, dados.formaPagamento)
         return campanha
     
 
     def verificar_existencia_formaPagamento(self, postGree: PostgresQueries, id_forma: int) -> bool:
-        df_formaPagamento = postGree.sqlToDataFrame(f"select id_forma from formaPagamento where id_forma = {id_forma}")
+        # coluna primária é id_forma_pagamento segundo create_tables_ong.sql
+        df_formaPagamento = postGree.sqlToDataFrame(f"select id_forma_pagamento from formapagamento where id_forma_pagamento = {id_forma}")
         return not df_formaPagamento.empty

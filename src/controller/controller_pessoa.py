@@ -171,6 +171,10 @@ class Controller_Pessoa:
         return pessoa_excluida
 
     def verifica_existencia_pessoa(self, postgres: PostgresQueries, cpf: str) -> bool:
+        # assegura que a conexão/ cursor estejam inicializados antes de executar
+        if postgres.cur is None:
+            postgres.connect()
+
         df_pessoa = postgres.sqlToDataFrame(f"SELECT cpf FROM pessoa WHERE cpf = '{cpf}';")
         return not df_pessoa.empty
 
