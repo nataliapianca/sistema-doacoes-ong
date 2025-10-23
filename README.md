@@ -188,6 +188,7 @@ POSTGRES_PASSWORD=sua_senha
 POSTGRES_DBNAME=defaultdb
 
 O nome do usuário e a senha estão no: src\conexion\passphrase\authentication.pg
+
 O módulo postgres_queries.py (se configurado para isso) usará python-dotenv para carregar essas variáveis automaticamente.
 
 2. Dependências (Linux)
@@ -197,7 +198,9 @@ Se o comando pip install falhar, execute:
 
 Bash
 sudo apt-get update
+
 sudo apt-get install libpq-dev
+
 Após instalar o libpq-dev, tente executar pip install -r requirements.txt novamente.
 
 ## Observações de Configuração
