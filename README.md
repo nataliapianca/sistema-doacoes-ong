@@ -178,9 +178,13 @@ Ini, TOML
 
 # .env
 POSTGRES_HOST="bdong-nhui.j.aivencloud.com"
+
 POSTGRES_PORT=15697
+
 POSTGRES_USER=avnadmin
+
 POSTGRES_PASSWORD=sua_senha
+
 POSTGRES_DBNAME=defaultdb
 
 O nome do usuário e a senha estão no: src\conexion\passphrase\authentication.pg
