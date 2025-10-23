@@ -159,6 +159,43 @@ Instale as dependências com:
 ```bash
 pip install -r requirements.txt
 ```
+As principais bibliotecas são:
+
+psycopg2-binary: O driver (conector) Python para o banco de dados PostgreSQL.
+
+pandas: Utilizado para exibir os dados de forma tabular e no módulo de conexão.
+
+python-dotenv: (Recomendado) Para carregar as credenciais do banco de dados de um arquivo .env.
+
+Configuração do Ambiente
+1. Credenciais do Banco (Aiven)
+Para conectar-se ao seu banco de dados PostgreSQL no Aiven, você precisa das credenciais (Host, Usuário, Senha, Porta, Nome do Banco).
+
+É altamente recomendado não colocar suas credenciais diretamente no código (postgres_queries.py). Em vez disso, use um arquivo .env:
+
+Crie um arquivo chamado .env na raiz do projeto.
+
+Copie o conteúdo de .env_example e preencha com suas credenciais:
+
+Ini, TOML
+
+# .env
+POSTGRES_HOST=seu-host-do-aiven.aivencloud.com
+POSTGRES_PORT=sua_porta
+POSTGRES_USER=seu_usuario
+POSTGRES_PASSWORD=sua_senha
+POSTGRES_DBNAME=seu_banco
+O módulo postgres_queries.py (se configurado para isso) usará python-dotenv para carregar essas variáveis automaticamente.
+
+2. Dependências (Linux)
+Para que o psycopg2 (driver do PostgreSQL) seja instalado corretamente em distribuições Linux (como Ubuntu, Debian, etc.), você pode precisar instalar as bibliotecas de desenvolvimento do PostgreSQL primeiro.
+
+Se o comando pip install falhar, execute:
+Bash
+
+sudo apt-get update
+sudo apt-get install libpq-dev
+Após instalar o libpq-dev, tente executar pip install -r requirements.txt novamente.
 
 ---
 
