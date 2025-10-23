@@ -204,8 +204,6 @@ sudo apt-get install libpq-dev
 Após instalar o libpq-dev, tente executar pip install -r requirements.txt novamente.
 
 ## Observações de Configuração
-
-Caso esteja utilizando VSCode com PostgreSQL no **Aiven**, configure as credenciais do banco e host no módulo de conexão (`conexion/postgres_queries.py`).
 > Não é necessário instalar o Oracle InstantClient, pois o sistema utiliza PostgreSQL.
 
 ---
