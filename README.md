@@ -1,22 +1,3 @@
-Aqui está uma versão editada e refinada do seu README.md.
-
-As principais alterações foram:
-
-Correção na "Inicialização do Sistema": O placeholder ~$ pensa isso aqui foi substituído pelo comando correto para executar o script de criação do banco, com base na sua estrutura de arquivos (python src/create_tables_and_records_postgres.py).
-
-Consistência nos Caminhos: Os comandos de execução (principal.py, test.py) e as referências em "Scripts Principais" foram atualizados para incluir o prefixo src/, que é onde os arquivos estão localizados, conforme a árvore do projeto.
-
-Correção em "Scripts Principais": O nome do arquivo foi corrigido de create_tables_and_records.py para create_tables_and_records_postgres.py para bater com a árvore do projeto.
-
-Melhoria na "Configuração do Ambiente":
-
-A menção ao arquivo src\conexion\passphrase\authentication.pg foi removida. É uma má prática de segurança referenciar arquivos locais com senhas no README. A instrução para preencher o .env com as próprias credenciais do Aiven é a correta.
-
-A formatação do exemplo .env foi corrigida (removido "Ini, TOML").
-
-A instrução sobre .env_example foi generalizada, já que o arquivo não estava listado na árvore.
-
-Remoção de Contradição: A seção final "Observações de Configuração" foi removida, pois ela sugeria editar o arquivo postgres_queries.py diretamente, o que contradiz a prática recomendada de usar o arquivo .env (que já estava bem explicada).
 
 Sistema de Doações para ONG 🌟
 Um sistema simples e organizado para gerenciar doações, doadores e relatórios, com CRUD completo e interface amigável.
