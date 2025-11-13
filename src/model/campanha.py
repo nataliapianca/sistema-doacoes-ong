@@ -3,7 +3,7 @@ from .pessoa import Pessoa
 
 class Campanha:
     def __init__(self,
-                 id_campanha: int = None,
+                 id_campanha: str = None,
                  pessoa: Pessoa = None,
                  nome: str = None,
                  descricao: str = None,
@@ -46,7 +46,7 @@ class Campanha:
         self.status = False
 
 
-    def get_id_campanha(self) -> int:
+    def get_id_campanha(self) -> str:
         return self.id_campanha
 
     def get_pessoa(self) -> Pessoa:

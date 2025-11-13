@@ -1,5 +1,5 @@
 from model.pessoa import Pessoa
-from conexion.connection import PostgresQueries
+from conexion.connection import MongoQueries, PostgresQueries
 from model.doacao import Doacao
 from model.pessoa import Pessoa
 from conexion.connection import PostgresQueries
@@ -8,6 +8,7 @@ from model.recibo import Recibo
 from typing import List
 from utils import validation
 from utils import logger
+from bson.objectid import ObjectId
 
 
 class Controller_Pessoa:
@@ -244,6 +245,16 @@ class Controller_Pessoa:
 
         df_pessoa = postgres.sqlToDataFrame(f"SELECT cpf FROM pessoa WHERE cpf = '{cpf}';")
         return not df_pessoa.empty
+
+
+    #Já mexi nesse método, adicionei ele para diminuir a quantidade de chamadas no banco
+    def verifica_existencia_pessoa_por_id(self, mongo: MongoQueries, id_mongo: ObjectId) -> bool:
+        if mongo.cur is None:
+            mongo.connect()
+
+        doc_pessoa = mongo.db["pessoa"].find_one({"_id": id_mongo}, {"_id" : 1})
+        return doc_pessoa is not None
+    
 
     def validar_pessoa(self, postGree: PostgresQueries, cpf_pessoa: str = None) -> Pessoa:
         try:

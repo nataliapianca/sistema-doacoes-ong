@@ -1,24 +1,24 @@
 from datetime import date, datetime
+from bson.objectid import ObjectId
+import pandas as pd
 from controller.controller_pessoa import Controller_Pessoa
 from model.campanha import Campanha
-from conexion.connection import PostgresQueries
-from model.pessoa import Pessoa
-
+from conexion.connection import MongoQueries
 
 class Controller_Campanha:
     def __init__(self):
         self.control_pessoa = Controller_Pessoa()
+        self.mongo = MongoQueries()
 
     def inserir_campanha(self) -> Campanha:
         from controller.controller_formaPagamento import Controller_FormaPagamento
-        postGree = PostgresQueries(can_write=True)
-
+       
         cpf_pessoa = str(input("Digite o CPF da Pessoa: "))
-        pessoa = self.validar_pessoa(postGree, cpf_pessoa)
+        pessoa = self.control_pessoa.validar_pessoa(self.mongo, cpf_pessoa)
         if pessoa is None:
             return None
 
-        id_pessoa = int(pessoa.get_id_pessoa())
+        id_pessoa_mongo = ObjectId(pessoa.get_id_pessoa())
 
         nome = str(input("Informe o nome da Campanha: "))
         descricao = str(input("Descrição da Campanha: "))
@@ -32,199 +32,203 @@ class Controller_Campanha:
         forma_de_pagamento = str(
             input("Informa a forma de Pagamento(obs* Apenas uma): "))
 
-        # conectar e inserir usando RETURNING para obter id gerado
-        postGree.connect()
-        insert_sql = """
-        INSERT INTO Campanha (id_pessoa, nome, descricao, data_inicio, data_fim, formaPagamento)
-        VALUES (%(id_pessoa)s, %(nome)s, %(descricao)s, %(data_inicio)s, %(data_fim)s, %(forma_de_pagamento)s)
-        RETURNING id_campanha;
-        """
-
-        params = dict(id_pessoa=id_pessoa, nome=nome, descricao=descricao,
-                      data_inicio=data_inicio, data_fim=data_fim, forma_de_pagamento=forma_de_pagamento)
-
-        try:
-            postGree.cur.execute(insert_sql, params)
-            id_campanha_pk = postGree.cur.fetchone()[0]
-            postGree.conn.commit()
-        except Exception as e:
-            print(f"Erro ao inserir campanha: {e}")
-            postGree.close()
-            return None
-
-        nova_campanha = Campanha(id_campanha_pk, pessoa, nome, descricao, data_inicio, data_fim, forma_de_pagamento)
+       
+        self.mongo.connect()
+        resultado = self.mongo.db["campanha"].insert_one({"id_pessoa": id_pessoa_mongo,
+                                        "nome": nome,
+                                        "descricao": descricao,
+                                        "data_inicio": data_inicio,
+                                        "data_fim": data_fim,
+                                        "formaPagamento": forma_de_pagamento})
+        
+        novo_id = resultado.inserted_id
+        nova_campanha = Campanha(novo_id, pessoa, nome, descricao, data_inicio, data_fim, forma_de_pagamento)
 
         # criar forma de pagamento vinculada
         control_formaPagamento = Controller_FormaPagamento()
         formaPagamento_obj = control_formaPagamento.inserir_formaPagamento(
-            postGree, nova_campanha)
+            self.mongo, nova_campanha)
 
         if formaPagamento_obj is None:
             print("Erro ao adicionar a forma de pagamento")
-            postGree.close()
+            self.mongo.close()
             return None
 
         print("\nCampanha criada com sucesso!")
         print(nova_campanha.toString())
 
-        postGree.close()
+        self.mongo.close()
         return nova_campanha
 
+
     def atualizar_campanha(self) -> Campanha:
-        postGree = PostgresQueries(can_write=True)
-        postGree.connect()
+        self.mongo.connect()
         from controller.controller_formaPagamento import Controller_FormaPagamento
 
-        id_campanha = int(input("Informe o ID da Campanha que irá alterar: "))
+        id_campanha = input("Informe o ID da Campanha que irá alterar: ")
+        id_campanha_mongo = ObjectId(id_campanha)
 
-        if self.verifica_existencia_campanha(postGree, id_campanha):
-
-            cpf_pessoa = str(input("Digite o CPF da Pessoa Responsável: "))
-            pessoa = self.validar_pessoa(postGree, cpf_pessoa)
-            if pessoa == None:
-                return None
-
-            id_pessoa_respon = pessoa.get_id_pessoa()
-
-            df_campanha = postGree.sqlToDataFrame(
-                f"select id_campanha, id_pessoa, nome, descricao, data_inicio, data_fim, formaPagamento from campanha where id_campanha = {id_campanha}")
-            
-            if df_campanha.empty:
-                print("Erro: Campanha não encontrada após verificação de existência.")
-                return None
-            
-            nome = df_campanha.nome[0]
-            descricao = df_campanha.descricao[0]
-            data_inicio = df_campanha.data_inicio[0]
-            data_fim = df_campanha.data_fim[0]
-            formaPagamento = df_campanha.formapagamento[0]
-
-            if (input("Você quer alterar o nome da Campanha?(s/n) ").lower() == "s"):
-                nome = str(input("Informe o nome da Campanha: "))
-
-            if (input("Você quer alterar a descrção da Campanha?(s/n) ").lower() == "s"):
-                descricao = str(input("Descrição da Campanha: "))
-
-            if (input("Você quer alterar a data de início da Campanha?(s/n) ").lower() == "s"):
-                data_i = input("Data de início(dd/mm/aaaa): ")
-                data_inicio = datetime.strptime(data_i, "%d/%m/%Y").date()
-
-            if (input("Você quer alterar a data de término da Campanha?(s/n) ").lower() == "s"):
-                data_f = input("Data de término(dd/mm/aaaa): ")
-                data_fim = datetime.strptime(data_f, "%d/%m/%Y").date()
-
-            if (input("Você quer alterar a forma de pagamento da Campanha?(s/n) ").lower() == "s"):
-                formaPagamento = str(
-                    input("Informe a Forma de Pagamento(obs* Apenas uma): "))
-                control_formaPagamento = Controller_FormaPagamento()
-                formaPagamento_obj = control_formaPagamento.atualizar_formaPagamento(
-                    id_campanha, id_pessoa_respon, formaPagamento)
-
-                if formaPagamento_obj is None:
-                    print("Erro ao adicionar a forma de pagamento")
-                    return None
-
-            postGree.write(
-                f"update Campanha set id_pessoa = {id_pessoa_respon}, nome = '{nome}', descricao = '{descricao}', data_inicio = '{data_inicio}', data_fim = '{data_fim}', formaPagamento = '{formaPagamento}' where id_campanha = {id_campanha}")
-
-            campanha_atualizada = Campanha(
-                id_campanha, pessoa, nome, descricao, data_inicio, data_fim, formaPagamento)
-            print(campanha_atualizada.toString())
-
-            return campanha_atualizada
-        else:
+        if not self.verifica_existencia_campanha( self.mongo, id_campanha_mongo):
             print(f"A campanha de ID {id_campanha} não existe.")
             return None
 
+        cpf_pessoa = str(input("Digite o CPF da Pessoa Responsável: "))
+        pessoa = self.control_pessoa.validar_pessoa( self.mongo, cpf_pessoa)
+        if pessoa == None:
+            return None
+
+        id_pessoa_respon = ObjectId(pessoa.get_id_pessoa())
+
+
+        doc_campanha= self.mongo.db["campanha"].find_one({"_id":id_campanha_mongo},
+                                                                       {"nome": 1,
+                                                                        "descricao": 1,
+                                                                        "data_inicio": 1,
+                                                                        "data_fim": 1,
+                                                                        "formaPagamento": 1,
+                                                                        "_id" : 0})
+        nome = doc_campanha.get("nome")
+        descricao = doc_campanha.get("descricao")
+        data_inicio = doc_campanha.get("data_inicio")
+        data_fim = doc_campanha.get("data_fim")
+        formaPagamento = doc_campanha.get("formaPagamento")
+
+        if (input("Você quer alterar o nome da Campanha?(s/n) ").lower() == "s"):
+            nome = str(input("Informe o nome da Campanha: "))
+
+        if (input("Você quer alterar a descrção da Campanha?(s/n) ").lower() == "s"):
+            descricao = str(input("Descrição da Campanha: "))
+
+        if (input("Você quer alterar a data de início da Campanha?(s/n) ").lower() == "s"):
+            data_i = input("Data de início(dd/mm/aaaa): ")
+            data_inicio = datetime.strptime(data_i, "%d/%m/%Y").date()
+
+        if (input("Você quer alterar a data de término da Campanha?(s/n) ").lower() == "s"):
+            data_f = input("Data de término(dd/mm/aaaa): ")
+            data_fim = datetime.strptime(data_f, "%d/%m/%Y").date()
+
+        if (input("Você quer alterar a forma de pagamento da Campanha?(s/n) ").lower() == "s"):
+            formaPagamento = str(
+                input("Informe a Forma de Pagamento(obs* Apenas uma): "))
+            control_formaPagamento = Controller_FormaPagamento()
+            formaPagamento_obj = control_formaPagamento.atualizar_formaPagamento(
+                id_campanha_mongo, id_pessoa_respon, formaPagamento)
+
+            if formaPagamento_obj is None:
+                print("Erro ao adicionar a forma de pagamento")
+                return None
+
+
+        self.mongo.db["campanha"].update_one({"_id": id_campanha_mongo}, {"$set": {"id_pessoa": id_pessoa_respon,
+                                    "nome": nome,
+                                    "descricao": descricao,
+                                    "data_inicio": data_inicio,
+                                    "data_fim": data_fim,
+                                    "formaPagamento": formaPagamento}})
+
+
+        campanha_atualizada = Campanha(id_campanha, pessoa, nome, descricao, data_inicio, data_fim, formaPagamento)
+        print(campanha_atualizada.toString())
+
+        return campanha_atualizada
+      
+
     def desativar_campanha(self):
-        postGree = PostgresQueries(can_write=True)
-        postGree.connect()
+            self.mongo.connect()
 
-        id_campanha = int(
-            input("Informe o ID da Campanha que irá desativar: "))
+            id_campanha = input("Informe o ID da Campanha que irá desativar: ")
+            id_campanha_mongo = ObjectId(id_campanha)
 
-        if self.verifica_existencia_campanha(postGree, id_campanha):
-            df_campanha = postGree.sqlToDataFrame(
-                f"select id_pessoa, nome, descricao, data_inicio, data_fim, formaPagamento from campanha where id_campanha = {id_campanha}")
+            if not self.verifica_existencia_campanha( self.mongo, id_campanha_mongo):
+                print(f"A campanha de ID {id_campanha} não existe.")
+                return None
 
-            if df_campanha.empty:
+            doc_campanha = self.mongo.db["campanha"].find_one({"_id":id_campanha_mongo},
+                                                                            {"id_pessoa": 1,
+                                                                             "nome": 1,
+                                                                            "descricao": 1,
+                                                                            "data_inicio": 1,
+                                                                            "data_fim": 1,
+                                                                            "formaPagamento": 1,
+                                                                            "_id": 0})
+                
+
+            if doc_campanha is None:
                 print("Campanha não encontrada, apesar da verificação de existência.")
                 return None
             
-            id_pessoa = df_campanha.id_pessoa.values[0]
-            sql_cpf = f"select cpf from Pessoa where id_pessoa = {id_pessoa}"
-            df_pessoa = postGree.sqlToDataFrame(sql_cpf)
+            id_pessoa = doc_campanha.get("id_pessoa")
+            if id_pessoa is not None:
+                id_pessoa_mongo = ObjectId(id_pessoa)
 
-            if df_pessoa.empty:
+            if not self.control_pessoa.verifica_existencia_pessoa_por_id(self.mongo, id_pessoa_mongo):
                 print("Pessoa responsável não encontrada.")
                 return None
             
-
-            cpf_pessoa = df_pessoa.cpf.values[0]
-            pessoa = self.validar_pessoa(postGree, cpf_pessoa)
-
-            opcao_desativar = input(
-                f"Tem certeza que deseja desativar a campanha {id_campanha} [S ou N]? ")
+            nome_campanha = doc_campanha.get("nome")
+            opcao_desativar = input(f"Tem certeza que deseja desativar a campanha {nome_campanha} [S ou N]? ")
             if opcao_desativar.lower() == "s":
-                postGree.write(
-                    f"update Campanha set status = False where id_campanha = {id_campanha}")
-                campanha_desativada = Campanha(id_campanha, pessoa, df_campanha.nome[0], df_campanha.descricao[
-                                               0], df_campanha.data_inicio[0], df_campanha.data_fim[0], df_campanha.formapagamento[0])
-                
-                campanha_desativada.desativar()
-
+                self.mongo.db["campanha"].update_one({"_id" : id_campanha_mongo}, {"$set": {"status" : False}})
+                   
                 print("Campanha desativada com Sucesso!")
-                print(campanha_desativada.toString())
-                return campanha_desativada
-            return None
 
-        else:
-            print(
-                f"A campanha de ID {id_campanha} não existe ou está inativa.")
-            return None
 
-    def verifica_existencia_campanha(self, postGree: PostgresQueries, id_campanha: int = None) -> bool:
-        df_campanha = postGree.sqlToDataFrame(
-            f"select id_campanha from Campanha where id_campanha = {id_campanha} and status = TRUE")
-        return not df_campanha.empty
+    def verifica_existencia_campanha(self, mongo: MongoQueries, id_campanha_mongo: ObjectId = None) -> bool:
+        doc_campanha = mongo.db["campanha"].find_one({"_id" : id_campanha_mongo, "status" : True}, {"_id" : 1})
+        return doc_campanha is not None
 
-    def listar_campanhas_pessoas(self, postGree: PostgresQueries, need_connect: bool = False):
-        query = """
-        SELECT 
-            c.id_campanha,
-            c.nome AS nome_campanha,
-            c.descricao,
-            c.data_inicio,
-            c.data_fim,
-            c.status,
-            d.id_doacao,
-            p.nome AS nome_doador,
-            d.valor AS valor_doacao,
-            c.formapagamento AS forma_pagamento_campanha
-        FROM campanha c
-        INNER JOIN doacao d ON c.id_campanha = d.id_campanha
-        INNER JOIN pessoa p ON d.id_pessoa = p.id_pessoa
-        LEFT JOIN formapagamento fp ON c.id_campanha = fp.id_campanha
-        ORDER BY c.data_inicio DESC, nome_campanha, d.data_doacao;
-        """
+
+    def buscar_campanhas_com_doacoes(self, mongo: MongoQueries, need_connect: bool = True):
+        pipeline = [
+            {
+                '$lookup': {
+                    'from': 'doacao',            # Coleção alvo (tabela d)
+                    'localField': 'id_campanha', # Campo na coleção 'campanha' (c.id_campanha)
+                    'foreignField': 'id_campanha', # Campo na coleção 'doacao' (d.id_campanha)
+                    'as': 'doacoes'              # Nome do array que conterá as doações
+                }
+            },
+            {
+                '$unwind': '$doacoes'
+            },
+            {
+                '$lookup': {
+                    'from': 'pessoa',          # Coleção alvo (tabela p)
+                    'localField': 'doacoes.id_pessoa', # Campo na doacao (d.id_pessoa)
+                    'foreignField': '_id',     # Campo na pessoa (p.id_pessoa ou _id, assumindo que id_pessoa referencia _id)
+                    'as': 'doador'             # Nome do array que conterá a pessoa
+                }
+            },
+            {
+                '$unwind': '$doador'
+            },
+            {
+                '$project': {
+                    '_id': 0, # Oculta o _id da campanha
+                    'id_campanha': '$id_campanha',
+                    'nome_campanha': '$nome', # c.nome AS nome_campanha
+                    'descricao': '$descricao',
+                    'data_inicio': '$data_inicio',
+                    'data_fim': '$data_fim',
+                    'status': '$status',
+                    'forma_pagamento_campanha': '$formaPagamento', # c.formapagamento AS forma_pagamento_campanha
+                    
+                    # Campos da Doação
+                    'id_doacao': '$doacoes._id', # d.id_doacao (assumindo que o ID da doação é '_id')
+                    'valor_doacao': '$doacoes.valor', # d.valor AS valor_doacao
+                    
+                    # Campos da Pessoa (Doador)
+                    'nome_doador': '$doador.nome' # p.nome AS nome_doador
+                }
+            },
+            {
+                '$sort': {
+                    'data_inicio': -1,     # c.data_inicio DESC
+                    'nome_campanha': 1,    # nome_campanha ASC
+                    'doacoes.data_doacao': 1 # d.data_doacao ASC (necessário referenciar o campo original)
+                }
+            }
+        ]
         if need_connect:
-            postGree.connect()
-        print(postGree.sqlToDataFrame(query))
-
-    def validar_pessoa(self, postGree: PostgresQueries, cpf_pessoa: str = None) -> Pessoa:
-        if not self.control_pessoa.verifica_existencia_pessoa(postGree, cpf_pessoa):
-            print(f"A pessoa de CPF: {cpf_pessoa} informado não existe.")
-            return None
-
-        postGree.connect()
-        df_pessoa = postGree.sqlToDataFrame(
-            f"select id_pessoa, nome, cpf, email, senha, tipo_pessoa from Pessoa where cpf = '{cpf_pessoa}'")
-
-        if df_pessoa.empty:
-            print("Erro interno: Pessoa não encontrada.")
-            return None
-
-        pessoa = Pessoa(df_pessoa.id_pessoa.values[0], df_pessoa.nome.values[0], cpf_pessoa,
-                        df_pessoa.email.values[0], df_pessoa.senha.values[0], df_pessoa.tipo_pessoa.values[0])
-
-        return pessoa
+            mongo.connect()
+        print(list(mongo.db["campanha"].aggregate(pipeline)))
