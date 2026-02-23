@@ -1,16 +1,34 @@
 import psycopg2
 import pandas as pd
 import json
+import os
 
 class PostgresQueries:
     def __init__(self, can_write: bool = False):
         self.can_write = can_write
-        self.host = "bdong-nhui.j.aivencloud.com"
-        self.port = 15697
-        self.database = "sistema_doacoes"
 
-        with open("src/conexion/passphrase/authentication.pg", "r") as f:
-          self.user, self.password = f.read().strip().split(",")
+        # Configuração do banco via .env
+        self.host = os.getenv("DB_HOST")
+        self.port = int(os.getenv("DB_PORT", "5432"))
+        self.database = os.getenv("DB_NAME")
+        self.user = os.getenv("DB_USER")
+        self.password = os.getenv("DB_PASSWORD")
+
+        # Validação mínima (falha rápido e claro)
+        missing = [
+            name for name, value in {
+                "DB_HOST": self.host,
+                "DB_PORT": self.port,
+                "DB_NAME": self.database,
+                "DB_USER": self.user,
+                "DB_PASSWORD": self.password,
+            }.items() if not value
+        ]
+
+        if missing:
+            raise RuntimeError(
+                "Variáveis de ambiente ausentes: " + ", ".join(missing)
+            )
 
         self.conn = None
         self.cur = None
@@ -56,28 +74,6 @@ class PostgresQueries:
             self.conn.close()
 
 
-''' exemplo pra vcs urarem  primeiro chhama assim--
-from conexion.postgres import PostgresQueries
-
-ai vc cria a funcao
-def atualizar_nome_pessoa():
-    query = PostgresQueries(can_write=True)
-    query.connect()  --precisa sempre chamar pra conetar com o banco
-
-    ai vc poe a query que deseja, aqui é pra update --
-
-    sql = """
-    UPDATE pessoa
-    SET nome = 'Natt'
-    WHERE id_pessoa = 1;
-    """
-
-    query.write(sql)  -- o write escreve ela no banco
-    query.close()    --SEMPRE FECHEMM
-    print("Nome atualizado com sucesso!")'''
-
-
-"""GNT NAO IA POR NADA ESSA MERDAA"""
 if __name__ == "__main__":
     db = PostgresQueries()
     try:

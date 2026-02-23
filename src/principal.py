@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from utils import config
 from utils.splash_screen import SplashScreen
 from reports.relatorios import Relatorio
@@ -7,6 +10,7 @@ from controller.valida_login import ValidaLogin
 from controller.controller_doacao import Controller_Doacao
 from controller.controller_formaPagamento import Controller_FormaPagamento
 from conexion.connection import PostgresQueries
+
 
 # melhoria de UI: cores
 from colorama import init as colorama_init, Fore, Style
